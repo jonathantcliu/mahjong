@@ -5245,7 +5245,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
-		{canChi: false, canGang: false, canHu: false, canNewGame: true, canPeng: false, cpu1Hand: _List_Nil, cpu1Melds: 0, cpu1Shown: _List_Nil, cpu2Hand: _List_Nil, cpu2Melds: 0, cpu2Shown: _List_Nil, cpu3Hand: _List_Nil, cpu3Melds: 0, cpu3Shown: _List_Nil, deck: _List_Nil, discard: $elm$core$Maybe$Nothing, east: 0, message: 'Welcome!', north: 3, playerHand: _List_Nil, playerMelds: 0, playerSelected: $elm$core$Maybe$Nothing, playerShown: _List_Nil, request: $elm$core$Maybe$Nothing, south: 1, turn: 0, west: 2},
+		{canChi: false, canGang: false, canHu: false, canNewGame: true, canPeng: false, chiTiles: $elm$core$Maybe$Nothing, cpu1Hand: _List_Nil, cpu1Melds: 0, cpu1Shown: _List_Nil, cpu2Hand: _List_Nil, cpu2Melds: 0, cpu2Shown: _List_Nil, cpu3Hand: _List_Nil, cpu3Melds: 0, cpu3Shown: _List_Nil, deck: _List_Nil, discard: $elm$core$Maybe$Nothing, east: 0, gangTiles: $elm$core$Maybe$Nothing, message: 'Welcome!', north: 3, pengTiles: $elm$core$Maybe$Nothing, playerHand: _List_Nil, playerMelds: 0, playerSelected: $elm$core$Maybe$Nothing, playerShown: _List_Nil, request: $elm$core$Maybe$Nothing, south: 1, turn: 0, west: 2},
 		$elm$core$Platform$Cmd$none);
 };
 var $author$project$Main$CheckRequests = {$: 'CheckRequests'};
@@ -5674,9 +5674,22 @@ var $author$project$Main$subscriptions = function (model) {
 		5000,
 		$elm$core$Basics$always($author$project$Main$CheckRequests));
 };
+var $author$project$Strategy$Chi = function (a) {
+	return {$: 'Chi', a: a};
+};
 var $author$project$Main$DiscardedTile = F2(
 	function (tile, discarder) {
 		return {discarder: discarder, tile: tile};
+	});
+var $author$project$Strategy$Gang = function (a) {
+	return {$: 'Gang', a: a};
+};
+var $author$project$Strategy$Peng = function (a) {
+	return {$: 'Peng', a: a};
+};
+var $author$project$Main$Request = F2(
+	function (attempt, requester) {
+		return {attempt: attempt, requester: requester};
 	});
 var $author$project$Main$RunGame = {$: 'RunGame'};
 var $author$project$Main$addShown = F3(
@@ -5684,18 +5697,22 @@ var $author$project$Main$addShown = F3(
 		return (!n) ? _Utils_update(
 			model,
 			{
+				playerMelds: model.playerMelds + 1,
 				playerShown: _Utils_ap(model.playerShown, tiles)
 			}) : ((n === 1) ? _Utils_update(
 			model,
 			{
+				cpu1Melds: model.cpu1Melds + 1,
 				cpu1Shown: _Utils_ap(model.cpu1Shown, tiles)
 			}) : ((n === 2) ? _Utils_update(
 			model,
 			{
+				cpu2Melds: model.cpu2Melds + 1,
 				cpu2Shown: _Utils_ap(model.cpu2Shown, tiles)
 			}) : ((n === 3) ? _Utils_update(
 			model,
 			{
+				cpu3Melds: model.cpu3Melds + 1,
 				cpu3Shown: _Utils_ap(model.cpu3Shown, tiles)
 			}) : model)));
 	});
@@ -5711,6 +5728,128 @@ var $author$project$Main$assign = F2(
 			model,
 			{east: 3, north: 2, south: 0, turn: 3, west: 1}) : model)));
 	});
+var $author$project$Tile$Bamboo = {$: 'Bamboo'};
+var $author$project$Tile$Characters = {$: 'Characters'};
+var $author$project$Tile$Dots = {$: 'Dots'};
+var $author$project$Tile$Dragons = {$: 'Dragons'};
+var $author$project$Tile$Winds = {$: 'Winds'};
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $author$project$Tile$collect = F2(
+	function (suit, tiles) {
+		return A2(
+			$elm$core$List$filter,
+			function (t) {
+				return _Utils_eq(t.suit, suit);
+			},
+			tiles);
+	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $author$project$Strategy$combineTuples = function (tuples) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (t1, t2) {
+				return _Utils_Tuple2(
+					t1.a + t2.a,
+					_Utils_ap(t1.b, t2.b));
+			}),
+		_Utils_Tuple2(0, _List_Nil),
+		tuples);
+};
+var $author$project$Strategy$countTiles = F2(
+	function (tiles, newtile) {
+		var loop = F3(
+			function (l, t, seen) {
+				loop:
+				while (true) {
+					if (!l.b) {
+						return seen;
+					} else {
+						var first = l.a;
+						var rest = l.b;
+						if (_Utils_eq(first, t)) {
+							var $temp$l = rest,
+								$temp$t = t,
+								$temp$seen = seen + 1;
+							l = $temp$l;
+							t = $temp$t;
+							seen = $temp$seen;
+							continue loop;
+						} else {
+							var $temp$l = rest,
+								$temp$t = t,
+								$temp$seen = seen;
+							l = $temp$l;
+							t = $temp$t;
+							seen = $temp$seen;
+							continue loop;
+						}
+					}
+				}
+			});
+		return A3(loop, tiles, newtile, 0);
+	});
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$Strategy$countPeng = function (tiles) {
+	var loop = F4(
+		function (l, number, pengs, acc) {
+			loop:
+			while (true) {
+				if (!l.b) {
+					return _Utils_Tuple3(number, pengs, acc);
+				} else {
+					var tile = l.a;
+					var rest = l.b;
+					var guess = A2($author$project$Strategy$countTiles, rest, tile) + 1;
+					if (guess === 3) {
+						var leftover = A2(
+							$elm$core$List$filter,
+							function (x) {
+								return !_Utils_eq(x, tile);
+							},
+							l);
+						var $temp$l = leftover,
+							$temp$number = number + 1,
+							$temp$pengs = A2(
+							$elm$core$List$cons,
+							_List_fromArray(
+								[tile, tile, tile]),
+							pengs),
+							$temp$acc = leftover;
+						l = $temp$l;
+						number = $temp$number;
+						pengs = $temp$pengs;
+						acc = $temp$acc;
+						continue loop;
+					} else {
+						var $temp$l = rest,
+							$temp$number = number,
+							$temp$pengs = pengs,
+							$temp$acc = A2($elm$core$List$cons, tile, acc);
+						l = $temp$l;
+						number = $temp$number;
+						pengs = $temp$pengs;
+						acc = $temp$acc;
+						continue loop;
+					}
+				}
+			}
+		});
+	return A4(loop, tiles, 0, _List_Nil, _List_Nil);
+};
 var $author$project$Tile$Tile = F2(
 	function (value, suit) {
 		return {suit: suit, value: value};
@@ -5908,145 +6047,6 @@ var $author$project$Strategy$countSequences = function (tiles) {
 				unused));
 	}
 };
-var $author$project$Strategy$checkForChi = F2(
-	function (tiles, newtile) {
-		var _v0 = $author$project$Strategy$countSequences(
-			A2($elm$core$List$cons, newtile, tiles));
-		var n = _v0.a;
-		var sequences = _v0.b;
-		var rest = _v0.c;
-		return n > 0;
-	});
-var $author$project$Strategy$countTiles = F2(
-	function (tiles, newtile) {
-		var loop = F3(
-			function (l, t, seen) {
-				loop:
-				while (true) {
-					if (!l.b) {
-						return seen;
-					} else {
-						var first = l.a;
-						var rest = l.b;
-						if (_Utils_eq(first, t)) {
-							var $temp$l = rest,
-								$temp$t = t,
-								$temp$seen = seen + 1;
-							l = $temp$l;
-							t = $temp$t;
-							seen = $temp$seen;
-							continue loop;
-						} else {
-							var $temp$l = rest,
-								$temp$t = t,
-								$temp$seen = seen;
-							l = $temp$l;
-							t = $temp$t;
-							seen = $temp$seen;
-							continue loop;
-						}
-					}
-				}
-			});
-		return A3(loop, tiles, newtile, 0);
-	});
-var $author$project$Strategy$checkForGang = F2(
-	function (tiles, newtile) {
-		return A2($author$project$Strategy$countTiles, tiles, newtile) === 3;
-	});
-var $author$project$Strategy$checkForPeng = F2(
-	function (tiles, newtile) {
-		return A2($author$project$Strategy$countTiles, tiles, newtile) === 2;
-	});
-var $author$project$Tile$Bamboo = {$: 'Bamboo'};
-var $author$project$Tile$Characters = {$: 'Characters'};
-var $author$project$Tile$Dots = {$: 'Dots'};
-var $author$project$Tile$Dragons = {$: 'Dragons'};
-var $author$project$Tile$Winds = {$: 'Winds'};
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var $author$project$Tile$collect = F2(
-	function (suit, tiles) {
-		return A2(
-			$elm$core$List$filter,
-			function (t) {
-				return _Utils_eq(t.suit, suit);
-			},
-			tiles);
-	});
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $author$project$Strategy$combineTuples = function (tuples) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (t1, t2) {
-				return _Utils_Tuple2(
-					t1.a + t2.a,
-					_Utils_ap(t1.b, t2.b));
-			}),
-		_Utils_Tuple2(0, _List_Nil),
-		tuples);
-};
-var $elm$core$Basics$neq = _Utils_notEqual;
-var $author$project$Strategy$countPeng = function (tiles) {
-	var loop = F4(
-		function (l, number, pengs, acc) {
-			loop:
-			while (true) {
-				if (!l.b) {
-					return _Utils_Tuple3(number, pengs, acc);
-				} else {
-					var tile = l.a;
-					var rest = l.b;
-					var guess = A2($author$project$Strategy$countTiles, rest, tile) + 1;
-					if (guess === 3) {
-						var leftover = A2(
-							$elm$core$List$filter,
-							function (x) {
-								return !_Utils_eq(x, tile);
-							},
-							l);
-						var $temp$l = leftover,
-							$temp$number = number + 1,
-							$temp$pengs = A2(
-							$elm$core$List$cons,
-							_List_fromArray(
-								[tile, tile, tile]),
-							pengs),
-							$temp$acc = leftover;
-						l = $temp$l;
-						number = $temp$number;
-						pengs = $temp$pengs;
-						acc = $temp$acc;
-						continue loop;
-					} else {
-						var $temp$l = rest,
-							$temp$number = number,
-							$temp$pengs = pengs,
-							$temp$acc = A2($elm$core$List$cons, tile, acc);
-						l = $temp$l;
-						number = $temp$number;
-						pengs = $temp$pengs;
-						acc = $temp$acc;
-						continue loop;
-					}
-				}
-			}
-		});
-	return A4(loop, tiles, 0, _List_Nil, _List_Nil);
-};
 var $author$project$Strategy$handleNumbered = function (tiles) {
 	var _v0 = $author$project$Strategy$countPeng(tiles);
 	var pengNumber = _v0.a;
@@ -6101,6 +6101,20 @@ var $author$project$Strategy$checkWin = F2(
 		} else {
 			return false;
 		}
+	});
+var $author$project$Strategy$countGang = F2(
+	function (tiles, newtile) {
+		return (A2($author$project$Strategy$countTiles, tiles, newtile) === 3) ? _Utils_Tuple2(
+			_List_fromArray(
+				[newtile, newtile, newtile, newtile]),
+			A2(
+				$elm$core$List$filter,
+				function (x) {
+					return !_Utils_eq(x, newtile);
+				},
+				tiles)) : _Utils_Tuple2(
+			_List_Nil,
+			A2($elm$core$List$cons, newtile, tiles));
 	});
 var $elm$core$List$drop = F2(
 	function (n, list) {
@@ -6417,53 +6431,6 @@ var $author$project$Main$getHand = F2(
 	function (model, n) {
 		return (!n) ? model.playerHand : ((n === 1) ? model.cpu1Hand : ((n === 2) ? model.cpu2Hand : ((n === 3) ? model.cpu3Hand : _List_Nil)));
 	});
-var $author$project$Strategy$Chi = function (a) {
-	return {$: 'Chi', a: a};
-};
-var $author$project$Strategy$Gang = function (a) {
-	return {$: 'Gang', a: a};
-};
-var $author$project$Strategy$Peng = function (a) {
-	return {$: 'Peng', a: a};
-};
-var $author$project$Main$Request = F2(
-	function (attempt, requester) {
-		return {attempt: attempt, requester: requester};
-	});
-var $author$project$Main$getMelds = F2(
-	function (model, n) {
-		return (!n) ? model.playerMelds : ((n === 1) ? model.cpu1Melds : ((n === 2) ? model.cpu2Melds : ((n === 3) ? model.cpu3Melds : 0)));
-	});
-var $elm$core$Basics$modBy = _Basics_modBy;
-var $author$project$Main$updateHand = F3(
-	function (model, tiles, n) {
-		return (!n) ? _Utils_update(
-			model,
-			{playerHand: tiles}) : ((n === 1) ? _Utils_update(
-			model,
-			{cpu1Hand: tiles}) : ((n === 2) ? _Utils_update(
-			model,
-			{cpu2Hand: tiles}) : ((n === 3) ? _Utils_update(
-			model,
-			{cpu3Hand: tiles}) : model)));
-	});
-var $author$project$Strategy$Hu = function (a) {
-	return {$: 'Hu', a: a};
-};
-var $author$project$Strategy$countGang = F2(
-	function (tiles, newtile) {
-		return (A2($author$project$Strategy$countTiles, tiles, newtile) === 3) ? _Utils_Tuple2(
-			_List_fromArray(
-				[newtile, newtile, newtile, newtile]),
-			A2(
-				$elm$core$List$filter,
-				function (x) {
-					return !_Utils_eq(x, newtile);
-				},
-				tiles)) : _Utils_Tuple2(
-			_List_Nil,
-			A2($elm$core$List$cons, newtile, tiles));
-	});
 var $author$project$Strategy$getMeldWith = F2(
 	function (melds, tile) {
 		if (!melds.b) {
@@ -6495,6 +6462,26 @@ var $author$project$Strategy$getMeldWith = F2(
 			return A2(loop, meld, meld);
 		}
 	});
+var $author$project$Main$getMelds = F2(
+	function (model, n) {
+		return (!n) ? model.playerMelds : ((n === 1) ? model.cpu1Melds : ((n === 2) ? model.cpu2Melds : ((n === 3) ? model.cpu3Melds : 0)));
+	});
+var $elm$core$Basics$modBy = _Basics_modBy;
+var $author$project$Main$updateHand = F3(
+	function (model, tiles, n) {
+		return (!n) ? _Utils_update(
+			model,
+			{playerHand: tiles}) : ((n === 1) ? _Utils_update(
+			model,
+			{cpu1Hand: tiles}) : ((n === 2) ? _Utils_update(
+			model,
+			{cpu2Hand: tiles}) : ((n === 3) ? _Utils_update(
+			model,
+			{cpu3Hand: tiles}) : model)));
+	});
+var $author$project$Strategy$Hu = function (a) {
+	return {$: 'Hu', a: a};
+};
 var $elm$core$List$any = F2(
 	function (isOkay, list) {
 		any:
@@ -7330,20 +7317,68 @@ var $author$project$Main$update = F2(
 						var _v5 = _Utils_Tuple2(dt.tile, dt.discarder);
 						var t = _v5.a;
 						var discarder = _v5.b;
-						return (!model.turn) ? _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									canChi: A2($author$project$Strategy$checkForChi, model.playerHand, t),
-									canGang: A2($author$project$Strategy$checkForGang, model.playerHand, t),
-									canHu: A2($author$project$Strategy$checkWin, model.playerHand, model.playerMelds),
-									canPeng: A2($author$project$Strategy$checkForPeng, model.playerHand, t)
-								}),
-							$elm$core$Platform$Cmd$none) : A4($author$project$Main$getMove, model, 1, t, discarder);
+						if (!model.turn) {
+							var hand = A2($elm$core$List$cons, t, model.playerHand);
+							var hu = A2($author$project$Strategy$checkWin, hand, model.playerMelds);
+							var _v6 = $author$project$Strategy$countSequences(hand);
+							var seqCount = _v6.a;
+							var seqs = _v6.b;
+							var seqrest = _v6.c;
+							var seqsWithTile = A2($author$project$Strategy$getMeldWith, seqs, t);
+							var chiT = function () {
+								if (!seqsWithTile.b) {
+									return $elm$core$Maybe$Nothing;
+								} else {
+									var seqhd = seqsWithTile.a;
+									var seqtl = seqsWithTile.b;
+									return $elm$core$Maybe$Just(
+										_Utils_Tuple2(
+											seqsWithTile,
+											A2($author$project$Strategy$removeSublist, seqsWithTile, hand)));
+								}
+							}();
+							var _v7 = $author$project$Strategy$countPeng(hand);
+							var pengCount = _v7.a;
+							var pengs = _v7.b;
+							var pengrest = _v7.c;
+							var pengsWithTile = A2($author$project$Strategy$getMeldWith, pengs, t);
+							var pengT = function () {
+								if (!pengsWithTile.b) {
+									return $elm$core$Maybe$Nothing;
+								} else {
+									var penghd = pengsWithTile.a;
+									var pengtl = pengsWithTile.b;
+									return $elm$core$Maybe$Just(
+										_Utils_Tuple2(
+											pengsWithTile,
+											A2($author$project$Strategy$removeSublist, pengsWithTile, hand)));
+								}
+							}();
+							var _v8 = A2($author$project$Strategy$countGang, model.playerHand, t);
+							var gangs = _v8.a;
+							var gangrest = _v8.b;
+							var gangT = _Utils_eq(gangs, _List_Nil) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
+								_Utils_Tuple2(gangs, gangrest));
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										canChi: (seqCount > 0) && (discarder === 3),
+										canGang: !_Utils_eq(gangs, _List_Nil),
+										canHu: hu,
+										canPeng: pengCount > 0,
+										chiTiles: chiT,
+										gangTiles: gangT,
+										pengTiles: pengT
+									}),
+								$elm$core$Platform$Cmd$none);
+						} else {
+							return A4($author$project$Main$getMove, model, 1, t, discarder);
+						}
 					}
 				case 'CheckRequests':
-					var _v6 = model.request;
-					if (_v6.$ === 'Nothing') {
+					var _v11 = model.request;
+					if (_v11.$ === 'Nothing') {
 						var $temp$msg = $author$project$Main$RunGame,
 							$temp$model = _Utils_update(
 							model,
@@ -7354,11 +7389,11 @@ var $author$project$Main$update = F2(
 						model = $temp$model;
 						continue update;
 					} else {
-						var r = _v6.a;
-						var _v7 = r.attempt;
-						switch (_v7.$) {
+						var r = _v11.a;
+						var _v12 = r.attempt;
+						switch (_v12.$) {
 							case 'Hu':
-								var tiles = _v7.a;
+								var tiles = _v12.a;
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
@@ -7367,27 +7402,27 @@ var $author$project$Main$update = F2(
 										}),
 									$elm$core$Platform$Cmd$none);
 							case 'Gang':
-								var _v8 = _v7.a;
-								var gang = _v8.a;
-								var rest = _v8.b;
+								var _v13 = _v12.a;
+								var gang = _v13.a;
+								var rest = _v13.b;
 								var newModel = A3($author$project$Main$addShown, model, gang, r.requester);
 								var withNewTurn = _Utils_update(
 									newModel,
 									{request: $elm$core$Maybe$Nothing, turn: r.requester});
 								return _Utils_Tuple2(withNewTurn, $elm$core$Platform$Cmd$none);
 							case 'Peng':
-								var _v9 = _v7.a;
-								var peng = _v9.a;
-								var rest = _v9.b;
+								var _v14 = _v12.a;
+								var peng = _v14.a;
+								var rest = _v14.b;
 								var newModel = A3($author$project$Main$addShown, model, peng, r.requester);
 								var withNewTurn = _Utils_update(
 									newModel,
 									{request: $elm$core$Maybe$Nothing, turn: r.requester});
 								return _Utils_Tuple2(withNewTurn, $elm$core$Platform$Cmd$none);
 							default:
-								var _v10 = _v7.a;
-								var chi = _v10.a;
-								var rest = _v10.b;
+								var _v15 = _v12.a;
+								var chi = _v15.a;
+								var rest = _v15.b;
 								var newModel = A3($author$project$Main$addShown, model, chi, r.requester);
 								var withNewTurn = _Utils_update(
 									newModel,
@@ -7401,11 +7436,11 @@ var $author$project$Main$update = F2(
 						A2($author$project$Main$playerSelect, model, n),
 						$elm$core$Platform$Cmd$none);
 				case 'PlayerDiscard':
-					var _v11 = model.playerSelected;
-					if (_v11.$ === 'Nothing') {
+					var _v16 = model.playerSelected;
+					if (_v16.$ === 'Nothing') {
 						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					} else {
-						var t = _v11.a;
+						var t = _v16.a;
 						var newHand = A2($author$project$Tile$remove, t, model.playerHand);
 						return _Utils_Tuple2(
 							_Utils_update(
@@ -7423,10 +7458,133 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{message: 'you win off self-drawn tile'}),
+							{message: 'you win!'}),
 						$elm$core$Platform$Cmd$none);
+				case 'PlayerGang':
+					var _v17 = model.gangTiles;
+					if (_v17.$ === 'Nothing') {
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 607, column: 11},
+								end: {line: 607, column: 21}
+							})('impossible! check RunGame behavior for player, strategy calls');
+					} else {
+						var _v18 = _v17.a;
+						var g = _v18.a;
+						var r = _v18.b;
+						var $temp$msg = $author$project$Main$CheckRequests,
+							$temp$model = _Utils_update(
+							model,
+							{
+								request: $elm$core$Maybe$Just(
+									A2(
+										$author$project$Main$Request,
+										$author$project$Strategy$Gang(
+											_Utils_Tuple2(g, r)),
+										0))
+							});
+						msg = $temp$msg;
+						model = $temp$model;
+						continue update;
+					}
+				case 'PlayerPeng':
+					var _v19 = model.pengTiles;
+					if (_v19.$ === 'Nothing') {
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 616, column: 11},
+								end: {line: 616, column: 21}
+							})('impossible! check RunGame behavior for player, strategy calls');
+					} else {
+						var _v20 = _v19.a;
+						var p = _v20.a;
+						var r = _v20.b;
+						var _v21 = model.request;
+						if (_v21.$ === 'Nothing') {
+							var $temp$msg = $author$project$Main$CheckRequests,
+								$temp$model = _Utils_update(
+								model,
+								{
+									request: $elm$core$Maybe$Just(
+										A2(
+											$author$project$Main$Request,
+											$author$project$Strategy$Peng(
+												_Utils_Tuple2(p, r)),
+											0))
+								});
+							msg = $temp$msg;
+							model = $temp$model;
+							continue update;
+						} else {
+							var req = _v21.a;
+							var _v22 = req.attempt;
+							if (_v22.$ === 'Gang') {
+								var $temp$msg = $author$project$Main$CheckRequests,
+									$temp$model = _Utils_update(
+									model,
+									{message: 'overruled'});
+								msg = $temp$msg;
+								model = $temp$model;
+								continue update;
+							} else {
+								var $temp$msg = $author$project$Main$CheckRequests,
+									$temp$model = _Utils_update(
+									model,
+									{
+										request: $elm$core$Maybe$Just(
+											A2(
+												$author$project$Main$Request,
+												$author$project$Strategy$Peng(
+													_Utils_Tuple2(p, r)),
+												0))
+									});
+								msg = $temp$msg;
+								model = $temp$model;
+								continue update;
+							}
+						}
+					}
 				default:
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					var _v23 = model.pengTiles;
+					if (_v23.$ === 'Nothing') {
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 637, column: 11},
+								end: {line: 637, column: 21}
+							})('impossible! check RunGame behavior for player, strategy calls');
+					} else {
+						var _v24 = _v23.a;
+						var c = _v24.a;
+						var r = _v24.b;
+						var _v25 = model.request;
+						if (_v25.$ === 'Nothing') {
+							var $temp$msg = $author$project$Main$CheckRequests,
+								$temp$model = _Utils_update(
+								model,
+								{
+									request: $elm$core$Maybe$Just(
+										A2(
+											$author$project$Main$Request,
+											$author$project$Strategy$Chi(
+												_Utils_Tuple2(c, r)),
+											0))
+								});
+							msg = $temp$msg;
+							model = $temp$model;
+							continue update;
+						} else {
+							var $temp$msg = $author$project$Main$CheckRequests,
+								$temp$model = _Utils_update(
+								model,
+								{message: 'overruled'});
+							msg = $temp$msg;
+							model = $temp$model;
+							continue update;
+						}
+					}
 			}
 		}
 	});

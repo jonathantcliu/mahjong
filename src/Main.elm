@@ -538,7 +538,7 @@ update msg model =
                     | canHu = hu
                     , canGang = gangs /= []
                     , canPeng = pengCount > 0
-                    , canChi = seqCount > 0
+                    , canChi = seqCount > 0 && discarder == 3
                     , gangTiles = gangT
                     , pengTiles = pengT
                     , chiTiles = chiT },
@@ -584,7 +584,7 @@ update msg model =
     PlayerSelect n ->
       ( playerSelect model n
       , Cmd.none)
-    PlayerDiscard -> -- call RunGame
+    PlayerDiscard -> -- call RunGame 2021/03/07
       case model.playerSelected of
         Nothing ->
           (model, Cmd.none)
@@ -599,7 +599,7 @@ update msg model =
               , turn = modBy 4 (model.turn + 1) },
             Cmd.none )
     PlayerHu ->
-      ( { model | message = "you win off self-drawn tile" },
+      ( { model | message = "you win!" },
       Cmd.none )
     PlayerGang ->
       case model.gangTiles of
@@ -610,10 +610,48 @@ update msg model =
           update
           CheckRequests
           { model | request = Just (Request (Gang (g, r)) 0) }
-    _ -> -- PlayerGang, PlayerPeng, PlayerChi - get gangTiles, pengTiles, chiTiles
-         -- add to requests if can overrule requests, call CheckRequests no matter what
-         -- 2021/03/07, need to do peng and chi
-      (model, Cmd.none)
+    PlayerPeng ->
+      case model.pengTiles of
+        Nothing ->
+          Debug.todo
+            "impossible! check RunGame behavior for player, strategy calls"
+        Just (p, r) ->
+          case model.request of
+            Nothing ->
+              update
+              CheckRequests
+              { model | request = Just (Request (Peng (p, r)) 0) }
+            Just req ->
+              case req.attempt of
+                Gang _ ->
+                  update
+                  CheckRequests
+                  { model | message = "overruled"}
+                _ ->
+                  update
+                  CheckRequests
+                  { model | request = Just (Request (Peng (p, r)) 0) }
+    PlayerChi ->
+      case model.pengTiles of
+        Nothing ->
+          Debug.todo
+            "impossible! check RunGame behavior for player, strategy calls"
+        Just (c, r) ->
+          case model.request of
+            Nothing ->
+              update
+              CheckRequests
+              { model | request = Just (Request (Chi (c, r)) 0) }
+            _ ->
+              update
+              CheckRequests
+              { model | message = "overruled"}
+    --_ ->
+      -- PlayerGang, PlayerPeng, PlayerChi - get gangTiles, pengTiles, chiTiles
+      -- add to requests if can overrule requests, call CheckRequests no matter what
+      -- 2021/03/07, need to do peng and chi
+      -- 2021/03/08, preliminary done peng and chi, check canChi - needs to check if turn allowed!
+      --(model, Cmd.none)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
