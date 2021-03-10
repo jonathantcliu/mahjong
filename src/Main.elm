@@ -370,88 +370,6 @@ playerSelect model n =
           | playerSelected = Just t
           , message = "selected " ++ Debug.toString t }
 
--- goes through every cpu, gets move, and requests if it's allowed
-getMove : Model -> Int -> Tile -> Int -> (Model, Cmd Msg)
-getMove m cpu t discarder =
-    if cpu > 3 then (m, Cmd.none)
-    else if cpu == discarder then getMove m (cpu + 1) t discarder
-    else
-      let
-        attempt = Strategy.withDiscard t (getHand m cpu) (getMelds m cpu)
-      in
-        case attempt of
-          Nothing ->
-            getMove m (cpu + 1) t discarder
-          Just a ->
-            case a of
-              Hu _ ->
-                ({ m | message = "game over"}, Cmd.none)
-              Gang (gang, rest) ->
-                let
-                  newModel = updateHand m rest cpu
-                in
-                  getMove
-                  { newModel
-                    | request = Just (Request (Gang (gang, rest)) cpu) }
-                  (cpu + 1)
-                  t
-                  discarder
-              Peng (peng, rest) ->
-                case m.request of
-                  Just g ->
-                    case g.attempt of
-                      Gang (_, _)->
-                        getMove
-                        { m | message = "overruled"}
-                        (cpu + 1)
-                        t
-                        discarder
-                      _ ->
-                        let
-                          newModel = updateHand m rest cpu
-                        in
-                          getMove
-                          {newModel
-                            | request = Just (Request (Peng (peng, rest)) cpu)}
-                          (cpu + 1)
-                          t
-                          discarder
-                  Nothing ->
-                    let
-                      newModel = updateHand m rest cpu
-                    in
-                      getMove
-                      {newModel
-                        | request = Just (Request (Peng (peng, rest)) cpu)}
-                      (cpu + 1)
-                      t
-                      discarder
-              Chi (chi, rest) ->
-                case m.request of
-                  Nothing ->
-                    if discarder == modBy 4 (cpu + 3) then
-                      let
-                        newModel = updateHand m rest cpu
-                      in
-                        getMove
-                        { newModel
-                          | request = Just (Request (Chi (chi, rest)) cpu)}
-                        (cpu + 1)
-                        t
-                        discarder
-                    else
-                      getMove
-                      { m | message = "chi not allowed"}
-                      (cpu + 1)
-                      t
-                      discarder
-                  _ ->
-                    getMove
-                    { m | message = "overruled"}
-                    (cpu + 1)
-                    t
-                    discarder
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
@@ -483,8 +401,8 @@ update msg model =
             in
               ( { updatedModel
                   | deck = newDeck
-                  , message = "dealt tile to player"},
-              Cmd.none ) --check if canHu, canGang here
+                  , message = "dealt tile to player" },
+              Cmd.none )
           else
             let
               (newHand, newDeck)
@@ -493,11 +411,10 @@ update msg model =
               updatedModel = updateHand model leftover model.turn
             in
               ( { updatedModel
-                  | deck = newDeck
-                  , discard = Just (DiscardedTile toDiscard model.turn)
-                  , message = "processed game for " ++ Debug.toString model.turn
-                  , turn = modBy 4 (model.turn + 1) }
-              , Cmd.none )
+                | deck = newDeck
+                , discard = Just (DiscardedTile toDiscard model.turn)
+                , message = "processed game for " ++ Debug.toString model.turn
+                , turn = modBy 4 (model.turn + 1) }, Cmd.none)
         Just dt ->
           let
             (t, discarder) = (dt.tile, dt.discarder)
@@ -549,14 +466,19 @@ update msg model =
               -- need to update attemptTiles with the tiles for Gang, Peng, etc.
               -- 2021/03/07, preliminary done 2021/03/07
             else
-              getMove model 1 t discarder
+              -- getMove model 1 t discarder
+              (model, Cmd.none)
     CheckRequests ->
       case model.request of
         Nothing ->
           if model.turn == 0 then
             (model, Cmd.none)
           else
-            update RunGame { model | turn = modBy 4 (model.turn + 1) }
+            update
+            RunGame
+            { model
+            | turn = modBy 4 (model.turn + 1)
+            , discard = Nothing }
         Just r ->
           case r.attempt of
             Hu tiles ->
@@ -594,7 +516,7 @@ update msg model =
                 withNewTurn
     PlayerSelect n ->
       ( playerSelect model n
-      , Cmd.none)
+      , Cmd.none )
     PlayerDiscard -> -- call RunGame 2021/03/07
       case model.playerSelected of
         Nothing ->
