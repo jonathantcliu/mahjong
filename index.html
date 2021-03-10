@@ -5728,127 +5728,16 @@ var $author$project$Main$assign = F2(
 			model,
 			{east: 3, north: 2, south: 0, turn: 3, west: 1}) : model)));
 	});
-var $author$project$Tile$Bamboo = {$: 'Bamboo'};
-var $author$project$Tile$Characters = {$: 'Characters'};
-var $author$project$Tile$Dots = {$: 'Dots'};
-var $author$project$Tile$Dragons = {$: 'Dragons'};
-var $author$project$Tile$Winds = {$: 'Winds'};
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
 	});
-var $author$project$Tile$collect = F2(
-	function (suit, tiles) {
-		return A2(
-			$elm$core$List$filter,
-			function (t) {
-				return _Utils_eq(t.suit, suit);
-			},
-			tiles);
-	});
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $author$project$Strategy$combineTuples = function (tuples) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (t1, t2) {
-				return _Utils_Tuple2(
-					t1.a + t2.a,
-					_Utils_ap(t1.b, t2.b));
-			}),
-		_Utils_Tuple2(0, _List_Nil),
-		tuples);
-};
-var $author$project$Strategy$countTiles = F2(
-	function (tiles, newtile) {
-		var loop = F3(
-			function (l, t, seen) {
-				loop:
-				while (true) {
-					if (!l.b) {
-						return seen;
-					} else {
-						var first = l.a;
-						var rest = l.b;
-						if (_Utils_eq(first, t)) {
-							var $temp$l = rest,
-								$temp$t = t,
-								$temp$seen = seen + 1;
-							l = $temp$l;
-							t = $temp$t;
-							seen = $temp$seen;
-							continue loop;
-						} else {
-							var $temp$l = rest,
-								$temp$t = t,
-								$temp$seen = seen;
-							l = $temp$l;
-							t = $temp$t;
-							seen = $temp$seen;
-							continue loop;
-						}
-					}
-				}
-			});
-		return A3(loop, tiles, newtile, 0);
-	});
-var $elm$core$Basics$neq = _Utils_notEqual;
-var $author$project$Strategy$countPeng = function (tiles) {
-	var loop = F4(
-		function (l, number, pengs, acc) {
-			loop:
-			while (true) {
-				if (!l.b) {
-					return _Utils_Tuple3(number, pengs, acc);
-				} else {
-					var tile = l.a;
-					var rest = l.b;
-					var guess = A2($author$project$Strategy$countTiles, rest, tile) + 1;
-					if (guess === 3) {
-						var leftover = A2(
-							$elm$core$List$filter,
-							function (x) {
-								return !_Utils_eq(x, tile);
-							},
-							l);
-						var $temp$l = leftover,
-							$temp$number = number + 1,
-							$temp$pengs = A2(
-							$elm$core$List$cons,
-							_List_fromArray(
-								[tile, tile, tile]),
-							pengs),
-							$temp$acc = leftover;
-						l = $temp$l;
-						number = $temp$number;
-						pengs = $temp$pengs;
-						acc = $temp$acc;
-						continue loop;
-					} else {
-						var $temp$l = rest,
-							$temp$number = number,
-							$temp$pengs = pengs,
-							$temp$acc = A2($elm$core$List$cons, tile, acc);
-						l = $temp$l;
-						number = $temp$number;
-						pengs = $temp$pengs;
-						acc = $temp$acc;
-						continue loop;
-					}
-				}
-			}
-		});
-	return A4(loop, tiles, 0, _List_Nil, _List_Nil);
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
 };
 var $author$project$Tile$Tile = F2(
 	function (value, suit) {
@@ -5881,7 +5770,7 @@ var $author$project$Tile$West = {$: 'West'};
 var $author$project$Tile$White = {$: 'White'};
 var $elm$core$Debug$todo = _Debug_todo;
 var $author$project$Tile$intToValue = function (n) {
-	return (n === 1) ? $author$project$Tile$One : ((n === 2) ? $author$project$Tile$Two : ((n === 3) ? $author$project$Tile$Three : ((n === 4) ? $author$project$Tile$Four : ((n === 5) ? $author$project$Tile$Five : ((n === 6) ? $author$project$Tile$Six : ((n === 7) ? $author$project$Tile$Seven : ((n === 8) ? $author$project$Tile$Eight : ((n === 9) ? $author$project$Tile$Nine : ((n === 10) ? $author$project$Tile$East : ((n === 11) ? $author$project$Tile$South : ((n === 12) ? $author$project$Tile$West : ((n === 13) ? $author$project$Tile$North : ((n === 14) ? $author$project$Tile$Red : ((n === 15) ? $author$project$Tile$Green : ((n === 16) ? $author$project$Tile$White : _Debug_todo(
+	return (n === 1) ? $author$project$Tile$One : ((n === 2) ? $author$project$Tile$Two : ((n === 3) ? $author$project$Tile$Three : ((n === 4) ? $author$project$Tile$Four : ((n === 5) ? $author$project$Tile$Five : ((n === 6) ? $author$project$Tile$Six : ((n === 7) ? $author$project$Tile$Seven : ((n === 8) ? $author$project$Tile$Eight : ((n === 9) ? $author$project$Tile$Nine : ((n === 10) ? $author$project$Tile$East : ((n === 12) ? $author$project$Tile$South : ((n === 14) ? $author$project$Tile$West : ((n === 16) ? $author$project$Tile$North : ((n === 18) ? $author$project$Tile$Red : ((n === 20) ? $author$project$Tile$Green : ((n === 22) ? $author$project$Tile$White : _Debug_todo(
 		'Tile',
 		{
 			start: {line: 110, column: 8},
@@ -5981,17 +5870,17 @@ var $author$project$Tile$tileToInt = function (tile) {
 		case 'East':
 			return 10;
 		case 'South':
-			return 11;
-		case 'West':
 			return 12;
-		case 'North':
-			return 13;
-		case 'Red':
+		case 'West':
 			return 14;
-		case 'Green':
-			return 15;
-		default:
+		case 'North':
 			return 16;
+		case 'Red':
+			return 18;
+		case 'Green':
+			return 20;
+		default:
+			return 22;
 	}
 };
 var $author$project$Strategy$countSequences = function (tiles) {
@@ -6086,18 +5975,159 @@ var $author$project$Strategy$countSequences = function (tiles) {
 				unused));
 	}
 };
+var $author$project$Strategy$checkForChi = F2(
+	function (tiles, newtile) {
+		var _v0 = $author$project$Strategy$countSequences(
+			A2($elm$core$List$cons, newtile, tiles));
+		var n = _v0.a;
+		var sequences = _v0.b;
+		var rest = _v0.c;
+		return (n > 0) && A2(
+			$elm$core$List$member,
+			newtile,
+			$elm$core$List$concat(sequences));
+	});
+var $author$project$Strategy$countTiles = F2(
+	function (tiles, newtile) {
+		var loop = F3(
+			function (l, t, seen) {
+				loop:
+				while (true) {
+					if (!l.b) {
+						return seen;
+					} else {
+						var first = l.a;
+						var rest = l.b;
+						if (_Utils_eq(first, t)) {
+							var $temp$l = rest,
+								$temp$t = t,
+								$temp$seen = seen + 1;
+							l = $temp$l;
+							t = $temp$t;
+							seen = $temp$seen;
+							continue loop;
+						} else {
+							var $temp$l = rest,
+								$temp$t = t,
+								$temp$seen = seen;
+							l = $temp$l;
+							t = $temp$t;
+							seen = $temp$seen;
+							continue loop;
+						}
+					}
+				}
+			});
+		return A3(loop, tiles, newtile, 0);
+	});
+var $author$project$Strategy$checkForGang = F2(
+	function (tiles, newtile) {
+		return A2($author$project$Strategy$countTiles, tiles, newtile) === 3;
+	});
+var $author$project$Strategy$checkForPeng = F2(
+	function (tiles, newtile) {
+		return A2($author$project$Strategy$countTiles, tiles, newtile) === 2;
+	});
+var $author$project$Tile$Bamboo = {$: 'Bamboo'};
+var $author$project$Tile$Characters = {$: 'Characters'};
+var $author$project$Tile$Dots = {$: 'Dots'};
+var $author$project$Tile$Dragons = {$: 'Dragons'};
+var $author$project$Tile$Winds = {$: 'Winds'};
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $author$project$Tile$collect = F2(
+	function (suit, tiles) {
+		return A2(
+			$elm$core$List$filter,
+			function (t) {
+				return _Utils_eq(t.suit, suit);
+			},
+			tiles);
+	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $author$project$Strategy$combineTuples = function (tuples) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (t1, t2) {
+				return _Utils_Tuple2(
+					t1.a + t2.a,
+					_Utils_ap(t1.b, t2.b));
+			}),
+		_Utils_Tuple2(0, _List_Nil),
+		tuples);
+};
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$Strategy$countPeng = function (tiles) {
+	var loop = F4(
+		function (l, number, pengs, acc) {
+			loop:
+			while (true) {
+				if (!l.b) {
+					return _Utils_Tuple3(number, pengs, acc);
+				} else {
+					var tile = l.a;
+					var rest = l.b;
+					var guess = A2($author$project$Strategy$countTiles, rest, tile) + 1;
+					if (guess === 3) {
+						var leftover = A2(
+							$elm$core$List$filter,
+							function (x) {
+								return !_Utils_eq(x, tile);
+							},
+							l);
+						var $temp$l = leftover,
+							$temp$number = number + 1,
+							$temp$pengs = A2(
+							$elm$core$List$cons,
+							_List_fromArray(
+								[tile, tile, tile]),
+							pengs),
+							$temp$acc = acc;
+						l = $temp$l;
+						number = $temp$number;
+						pengs = $temp$pengs;
+						acc = $temp$acc;
+						continue loop;
+					} else {
+						var $temp$l = rest,
+							$temp$number = number,
+							$temp$pengs = pengs,
+							$temp$acc = A2($elm$core$List$cons, tile, acc);
+						l = $temp$l;
+						number = $temp$number;
+						pengs = $temp$pengs;
+						acc = $temp$acc;
+						continue loop;
+					}
+				}
+			}
+		});
+	return A4(loop, tiles, 0, _List_Nil, _List_Nil);
+};
 var $author$project$Strategy$handleNumbered = function (tiles) {
 	var _v0 = $author$project$Strategy$countSequences(tiles);
-	var pengNumber = _v0.a;
-	var pengs = _v0.b;
+	var seqNumber = _v0.a;
+	var sequences = _v0.b;
 	var leftover = _v0.c;
 	var _v1 = $author$project$Strategy$countPeng(leftover);
-	var seqNumber = _v1.a;
-	var sequences = _v1.b;
+	var pengNumber = _v1.a;
+	var pengs = _v1.b;
 	var leftover2 = _v1.c;
-	return _Utils_Tuple2(pengNumber + seqNumber, leftover2);
+	return _Utils_Tuple2(seqNumber + pengNumber, leftover2);
 };
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$Strategy$checkWin = F2(
 	function (tiles, declared) {
 		var numbered = _List_fromArray(
@@ -6119,20 +6149,17 @@ var $author$project$Strategy$checkWin = F2(
 		var dNum = _v1.a;
 		var dPengs = _v1.b;
 		var dRest = _v1.c;
-		var tuples = A2(
-			$elm$core$Debug$log,
-			'tuples',
+		var tuples = _Utils_ap(
+			numbered,
 			_Utils_ap(
-				numbered,
-				_Utils_ap(
-					_List_fromArray(
-						[
-							_Utils_Tuple2(wNum, wRest)
-						]),
-					_List_fromArray(
-						[
-							_Utils_Tuple2(dNum, dRest)
-						]))));
+				_List_fromArray(
+					[
+						_Utils_Tuple2(wNum, wRest)
+					]),
+				_List_fromArray(
+					[
+						_Utils_Tuple2(dNum, dRest)
+					])));
 		var _v2 = $author$project$Strategy$combineTuples(tuples);
 		var melds = _v2.a;
 		var leftover = _v2.b;
@@ -6441,8 +6468,8 @@ var $author$project$Strategy$findDiscard = function (tiles) {
 			return _Debug_todo(
 				'Strategy',
 				{
-					start: {line: 225, column: 13},
-					end: {line: 225, column: 23}
+					start: {line: 223, column: 13},
+					end: {line: 223, column: 23}
 				})('Exception: discard called on empty');
 		} else {
 			var ft = _v1.a;
@@ -6633,17 +6660,6 @@ var $elm$random$Random$generate = F2(
 			$elm$random$Random$Generate(
 				A2($elm$random$Random$map, tagger, generator)));
 	});
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
-var $elm$core$List$concat = function (lists) {
-	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
-};
 var $elm$core$List$concatMap = F2(
 	function (f, list) {
 		return $elm$core$List$concat(
@@ -7042,6 +7058,7 @@ var $author$project$Main$update = F2(
 								1);
 							var newHand = _v2.a;
 							var newDeck = _v2.b;
+							var hu = A2($author$project$Strategy$checkWin, newHand, model.playerMelds);
 							var updatedModel = A3(
 								$author$project$Main$updateHand,
 								model,
@@ -7050,7 +7067,7 @@ var $author$project$Main$update = F2(
 							return _Utils_Tuple2(
 								_Utils_update(
 									updatedModel,
-									{deck: newDeck, message: 'dealt tile to player'}),
+									{canChi: false, canGang: false, canHu: hu, canPeng: false, chiTiles: $elm$core$Maybe$Nothing, deck: newDeck, gangTiles: $elm$core$Maybe$Nothing, message: 'dealt tile to player', pengTiles: $elm$core$Maybe$Nothing}),
 								$elm$core$Platform$Cmd$none);
 						} else {
 							var _v3 = A3(
@@ -7064,24 +7081,28 @@ var $author$project$Main$update = F2(
 							var toDiscard = _v4.a;
 							var leftover = _v4.b;
 							var updatedModel = A3($author$project$Main$updateHand, model, leftover, model.turn);
-							return _Utils_Tuple2(
-								_Utils_update(
-									updatedModel,
-									{
-										deck: newDeck,
-										discard: $elm$core$Maybe$Just(
-											A2($author$project$Main$DiscardedTile, toDiscard, model.turn)),
-										message: 'processed game for ' + $elm$core$Debug$toString(model.turn),
-										turn: A2($elm$core$Basics$modBy, 4, model.turn)
-									}),
-								$elm$core$Platform$Cmd$none);
+							var $temp$msg = $author$project$Main$RunGame,
+								$temp$model = _Utils_update(
+								updatedModel,
+								{
+									deck: newDeck,
+									discard: $elm$core$Maybe$Just(
+										A2($author$project$Main$DiscardedTile, toDiscard, model.turn)),
+									message: 'processed game for ' + $elm$core$Debug$toString(model.turn),
+									turn: A2($elm$core$Basics$modBy, 4, model.turn)
+								});
+							msg = $temp$msg;
+							model = $temp$model;
+							continue update;
 						}
 					} else {
 						var dt = _v1.a;
 						var _v5 = _Utils_Tuple2(dt.tile, dt.discarder);
 						var t = _v5.a;
 						var discarder = _v5.b;
-						if (!model.turn) {
+						if (!discarder) {
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						} else {
 							var hand = A2($elm$core$List$cons, t, model.playerHand);
 							var hu = A2($author$project$Strategy$checkWin, hand, model.playerMelds);
 							var _v6 = $author$project$Strategy$countSequences(hand);
@@ -7127,17 +7148,15 @@ var $author$project$Main$update = F2(
 								_Utils_update(
 									model,
 									{
-										canChi: (seqCount > 0) && (discarder === 3),
-										canGang: !_Utils_eq(gangs, _List_Nil),
+										canChi: A2($author$project$Strategy$checkForChi, model.playerHand, t) && (discarder === 3),
+										canGang: A2($author$project$Strategy$checkForGang, model.playerHand, t),
 										canHu: hu,
-										canPeng: pengCount > 0,
+										canPeng: A2($author$project$Strategy$checkForPeng, model.playerHand, t),
 										chiTiles: chiT,
 										gangTiles: gangT,
 										pengTiles: pengT
 									}),
 								$elm$core$Platform$Cmd$none);
-						} else {
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						}
 					}
 				case 'CheckRequests':
@@ -7263,8 +7282,8 @@ var $author$project$Main$update = F2(
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 549, column: 11},
-								end: {line: 549, column: 21}
+								start: {line: 569, column: 11},
+								end: {line: 569, column: 21}
 							})('impossible! check RunGame behavior for player, strategy calls');
 					} else {
 						var _v19 = _v18.a;
@@ -7291,8 +7310,8 @@ var $author$project$Main$update = F2(
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 558, column: 11},
-								end: {line: 558, column: 21}
+								start: {line: 578, column: 11},
+								end: {line: 578, column: 21}
 							})('impossible! check RunGame behavior for player, strategy calls');
 					} else {
 						var _v21 = _v20.a;
@@ -7349,8 +7368,8 @@ var $author$project$Main$update = F2(
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 579, column: 11},
-								end: {line: 579, column: 21}
+								start: {line: 599, column: 11},
+								end: {line: 599, column: 21}
 							})('impossible! check RunGame behavior for player, strategy calls');
 					} else {
 						var _v25 = _v24.a;
@@ -7838,7 +7857,7 @@ var $author$project$Main$view = function (model) {
 										A2(
 											$author$project$Main$makePlayerSpans,
 											$author$project$Tile$showPlayerHand(model.playerShown),
-											250))
+											75))
 									]))
 							])),
 						A2(

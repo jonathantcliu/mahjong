@@ -80,8 +80,6 @@ countSequences tiles =
           (number, sequences, List.reverse (first::leftover))
         [first, second] ->
           (number, sequences, List.reverse (second::first::leftover))
-        -- potentially successful case
-        -- need to check if 1, 1, 2, 2, 3, 3 returns 2 for (1, 2, 3, 1, 2, 3)
         first::rest ->
           if List.member (first + 1) rest && List.member (first + 2) rest then
             loop
@@ -129,7 +127,7 @@ countPeng tiles =
                 leftover
                 (number + 1)
                 ([tile, tile, tile]::pengs)
-                leftover
+                acc
             else
               loop rest number pengs (tile::acc)
   in
@@ -147,10 +145,10 @@ countGang tiles newtile =
 handleNumbered : List Tile -> (Int, List Tile)
 handleNumbered tiles =
   let
-    (pengNumber, pengs, leftover) = countSequences tiles --countPeng
-    (seqNumber, sequences, leftover2) = countPeng leftover --countSequences
+    (seqNumber, sequences, leftover) = (countSequences tiles) --countPeng
+    (pengNumber, pengs, leftover2) = (countPeng leftover) --countSequences
   in
-    (pengNumber + seqNumber, leftover2)
+    (seqNumber + pengNumber, leftover2)
 
 combineTuples : List (Int, List Tile) -> (Int, List Tile)
 combineTuples tuples =
@@ -170,7 +168,7 @@ checkWin tiles declared =
       ]
     (wNum, wPengs, wRest) = countPeng (Tile.collect Winds tiles)
     (dNum, dPengs, dRest) = countPeng (Tile.collect Dragons tiles)
-    tuples = Debug.log "tuples" (numbered ++ [(wNum, wRest)] ++ [(dNum, dRest)])
+    tuples = numbered ++ [(wNum, wRest)] ++ [(dNum, dRest)]
     (melds, leftover) = combineTuples tuples
   in
     case leftover of
@@ -192,7 +190,7 @@ checkForChi tiles newtile =
   let
     (n, sequences, rest) = countSequences (newtile::tiles)
   in
-    n > 0
+    n > 0 && List.member newtile (List.concat sequences)
 
 findDiscardHelper : List (Maybe Tile) -> Maybe Tile --orList
 findDiscardHelper maybes =
@@ -332,3 +330,20 @@ testHand2 =
   , Tile Six Characters
   , Tile Seven Characters
   , Tile Eight Characters ]
+
+testHand3 : List Tile
+testHand3 =
+  [ Tile Eight Dots
+  , Tile Eight Dots
+  , Tile Eight Dots
+  , Tile Six Dots
+  , Tile Six Dots
+  , Tile Seven Bamboo
+  , Tile Eight Bamboo
+  , Tile Nine Bamboo
+  , Tile South Winds
+  , Tile South Winds
+  , Tile South Winds
+  , Tile Red Dragons
+  , Tile Red Dragons
+  , Tile Red Dragons ]

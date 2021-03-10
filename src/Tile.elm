@@ -77,17 +77,17 @@ tileToInt tile =
     East ->
       10
     South ->
-      11
-    West ->
       12
-    North ->
-      13
-    Red ->
+    West ->
       14
-    Green ->
-      15
-    White ->
+    North ->
       16
+    Red ->
+      18
+    Green ->
+      20
+    White ->
+      22
 
 intToValue : Int -> Value
 intToValue n =
@@ -101,12 +101,12 @@ intToValue n =
   else if n == 8 then Eight
   else if n == 9 then Nine
   else if n == 10 then East
-  else if n == 11 then South
-  else if n == 12 then West
-  else if n == 13 then North
-  else if n == 14 then Red
-  else if n == 15 then Green
-  else if n == 16 then White
+  else if n == 12 then South
+  else if n == 14 then West
+  else if n == 16 then North
+  else if n == 18 then Red
+  else if n == 20 then Green
+  else if n == 22 then White
   else Debug.todo "bad intToValue call"
 
 collect : Suit -> List Tile -> List Tile

@@ -172,7 +172,7 @@ view model =
       , tbody []
         [ tr []
           [ td []
-            (makePlayerSpans (Tile.showPlayerHand model.playerShown) 250)
+            (makePlayerSpans (Tile.showPlayerHand model.playerShown) 75)
           ]
         ]
         , tr []
@@ -396,11 +396,19 @@ update msg model =
             let
               (newHand, newDeck)
                 = Tile.deal (getHand model model.turn) model.deck 1
+              hu = Strategy.checkWin newHand model.playerMelds
               updatedModel =
                 updateHand model (Tile.sortHand newHand) model.turn
             in
               ( { updatedModel
                   | deck = newDeck
+                  , canHu = hu
+                  , canGang = False --暗杠?
+                  , canPeng = False
+                  , canChi = False
+                  , gangTiles = Nothing
+                  , pengTiles = Nothing
+                  , chiTiles = Nothing
                   , message = "dealt tile to player" },
               Cmd.none )
           else
@@ -410,16 +418,26 @@ update msg model =
               (toDiscard, leftover) = Strategy.findDiscard newHand
               updatedModel = updateHand model leftover model.turn
             in
+              update
+              RunGame
+              { updatedModel
+                | deck = newDeck
+                , discard = Just (DiscardedTile toDiscard model.turn)
+                , message = "processed game for " ++ Debug.toString model.turn
+                , turn = modBy 4 (model.turn) }
+              {-
               ( { updatedModel
                 | deck = newDeck
                 , discard = Just (DiscardedTile toDiscard model.turn)
                 , message = "processed game for " ++ Debug.toString model.turn
-                , turn = modBy 4 (model.turn) }, Cmd.none)
+                , turn = modBy 4 (model.turn) }, Cmd.none) -}
         Just dt ->
           let
             (t, discarder) = (dt.tile, dt.discarder)
           in
-            if model.turn == 0 then
+            if discarder == 0 then
+              (model, Cmd.none)
+            else
               let
                 hand = t::model.playerHand
                 hu = Strategy.checkWin hand model.playerMelds
@@ -455,9 +473,10 @@ update msg model =
               in
                 ( { model
                     | canHu = hu
-                    , canGang = gangs /= []
-                    , canPeng = pengCount > 0
-                    , canChi = seqCount > 0 && discarder == 3
+                    , canGang = Strategy.checkForGang model.playerHand t
+                    , canPeng = Strategy.checkForPeng model.playerHand t
+                    , canChi = Strategy.checkForChi model.playerHand t
+                               && discarder == 3
                     , gangTiles = gangT
                     , pengTiles = pengT
                     , chiTiles = chiT },
@@ -465,9 +484,10 @@ update msg model =
               -- ( { model | message = "HELLO" } , Cmd.none) --check if player can hu, gang, peng, chi, update canHu canGang, etc.
               -- need to update attemptTiles with the tiles for Gang, Peng, etc.
               -- 2021/03/07, preliminary done 2021/03/07
-            else
+            -- here lies spaghetti
+            -- else
               -- getMove model 1 t discarder
-              (model, Cmd.none)
+              -- (model, Cmd.none)
     CheckRequests ->
       case model.request of
         Nothing ->
