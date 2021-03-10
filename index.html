@@ -7442,17 +7442,19 @@ var $author$project$Main$update = F2(
 					} else {
 						var t = _v16.a;
 						var newHand = A2($author$project$Tile$remove, t, model.playerHand);
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									discard: $elm$core$Maybe$Just(
-										A2($author$project$Main$DiscardedTile, t, 0)),
-									playerHand: newHand,
-									playerSelected: $elm$core$Maybe$Nothing,
-									turn: A2($elm$core$Basics$modBy, 4, model.turn + 1)
-								}),
-							$elm$core$Platform$Cmd$none);
+						var $temp$msg = $author$project$Main$RunGame,
+							$temp$model = _Utils_update(
+							model,
+							{
+								discard: $elm$core$Maybe$Just(
+									A2($author$project$Main$DiscardedTile, t, 0)),
+								playerHand: newHand,
+								playerSelected: $elm$core$Maybe$Nothing,
+								turn: A2($elm$core$Basics$modBy, 4, model.turn + 1)
+							});
+						msg = $temp$msg;
+						model = $temp$model;
+						continue update;
 					}
 				case 'PlayerHu':
 					return _Utils_Tuple2(
@@ -7466,8 +7468,8 @@ var $author$project$Main$update = F2(
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 607, column: 11},
-								end: {line: 607, column: 21}
+								start: {line: 608, column: 11},
+								end: {line: 608, column: 21}
 							})('impossible! check RunGame behavior for player, strategy calls');
 					} else {
 						var _v18 = _v17.a;
@@ -7494,8 +7496,8 @@ var $author$project$Main$update = F2(
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 616, column: 11},
-								end: {line: 616, column: 21}
+								start: {line: 617, column: 11},
+								end: {line: 617, column: 21}
 							})('impossible! check RunGame behavior for player, strategy calls');
 					} else {
 						var _v20 = _v19.a;
@@ -7552,8 +7554,8 @@ var $author$project$Main$update = F2(
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 637, column: 11},
-								end: {line: 637, column: 21}
+								start: {line: 638, column: 11},
+								end: {line: 638, column: 21}
 							})('impossible! check RunGame behavior for player, strategy calls');
 					} else {
 						var _v24 = _v23.a;

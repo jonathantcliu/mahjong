@@ -592,12 +592,13 @@ update msg model =
           let
             newHand = Tile.remove t model.playerHand
           in
-            ( { model
-              | playerSelected = Nothing
-              , discard = Just (DiscardedTile t 0)
-              , playerHand = newHand
-              , turn = modBy 4 (model.turn + 1) },
-            Cmd.none )
+            update
+            RunGame
+            { model
+            | playerSelected = Nothing
+            , discard = Just (DiscardedTile t 0)
+            , playerHand = newHand
+            , turn = modBy 4 (model.turn + 1) }
     PlayerHu ->
       ( { model | message = "you win!" },
       Cmd.none )
