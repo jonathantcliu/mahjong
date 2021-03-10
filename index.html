@@ -6058,6 +6058,17 @@ var $author$project$Strategy$handleNumbered = function (tiles) {
 	var leftover2 = _v1.c;
 	return _Utils_Tuple2(pengNumber + seqNumber, leftover2);
 };
+var $author$project$Strategy$handleNumberedPrime = function (tiles) {
+	var _v0 = $author$project$Strategy$countSequences(tiles);
+	var seqNumber = _v0.a;
+	var sequences = _v0.b;
+	var leftover = _v0.c;
+	var _v1 = $author$project$Strategy$countPeng(leftover);
+	var pengNumber = _v1.a;
+	var pengs = _v1.b;
+	var leftover2 = _v1.c;
+	return _Utils_Tuple2(seqNumber + pengNumber, leftover2);
+};
 var $author$project$Strategy$checkWin = F2(
 	function (tiles, declared) {
 		var numbered = _List_fromArray(
@@ -6099,7 +6110,37 @@ var $author$project$Strategy$checkWin = F2(
 			var eye2 = _v4.a;
 			return _Utils_eq(eye1, eye2) && ((melds + declared) === 4);
 		} else {
-			return false;
+			var numberedPrime = _List_fromArray(
+				[
+					$author$project$Strategy$handleNumberedPrime(
+					A2($author$project$Tile$collect, $author$project$Tile$Dots, tiles)),
+					$author$project$Strategy$handleNumberedPrime(
+					A2($author$project$Tile$collect, $author$project$Tile$Bamboo, tiles)),
+					$author$project$Strategy$handleNumberedPrime(
+					A2($author$project$Tile$collect, $author$project$Tile$Characters, tiles))
+				]);
+			var tuples2 = _Utils_ap(
+				numberedPrime,
+				_Utils_ap(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(wNum, wRest)
+						]),
+					_List_fromArray(
+						[
+							_Utils_Tuple2(dNum, dRest)
+						])));
+			var _v5 = $author$project$Strategy$combineTuples(tuples2);
+			var melds2 = _v5.a;
+			var leftover2 = _v5.b;
+			if ((leftover2.b && leftover2.b.b) && (!leftover2.b.b.b)) {
+				var eye1 = leftover2.a;
+				var _v7 = leftover2.b;
+				var eye2 = _v7.a;
+				return _Utils_eq(eye1, eye2) && ((melds2 + declared) === 4);
+			} else {
+				return false;
+			}
 		}
 	});
 var $author$project$Strategy$countGang = F2(
@@ -6411,8 +6452,8 @@ var $author$project$Strategy$findDiscard = function (tiles) {
 			return _Debug_todo(
 				'Strategy',
 				{
-					start: {line: 224, column: 13},
-					end: {line: 224, column: 23}
+					start: {line: 244, column: 13},
+					end: {line: 244, column: 23}
 				})('Exception: discard called on empty');
 		} else {
 			var ft = _v1.a;

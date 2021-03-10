@@ -81,6 +81,7 @@ countSequences tiles =
         [first, second] ->
           (number, sequences, List.reverse (second::first::leftover))
         -- potentially successful case
+        -- need to check if 1, 1, 2, 2, 3, 3 returns 2 for (1, 2, 3, 1, 2, 3)
         first::second::third::rest ->
           if second == first + 1 && third == first + 2 then
             loop
@@ -169,7 +170,7 @@ checkWin tiles declared =
       ]
     (wNum, wPengs, wRest) = countPeng (Tile.collect Winds tiles)
     (dNum, dPengs, dRest) = countPeng (Tile.collect Dragons tiles)
-    tuples = numbered ++ [(wNum, wRest)] ++ [(dNum, dRest)]
+    tuples = Debug.log "tuples" (numbered ++ [(wNum, wRest)] ++ [(dNum, dRest)])
     (melds, leftover) = combineTuples tuples
   in
     case leftover of
@@ -314,3 +315,20 @@ testHand =
   , Tile Red Dragons
   , Tile East Winds
   , Tile East Winds ]
+
+testHand2 : List Tile
+testHand2 =
+  [ Tile Five Dots
+  , Tile Five Dots
+  , Tile Seven Bamboo
+  , Tile Seven Bamboo
+  , Tile Seven Bamboo
+  , Tile Four Characters
+  , Tile Five Characters
+  , Tile Six Characters
+  , Tile Four Characters
+  , Tile Five Characters
+  , Tile Six Characters
+  , Tile Six Characters
+  , Tile Seven Characters
+  , Tile Eight Characters ]
