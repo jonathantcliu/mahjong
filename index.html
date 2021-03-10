@@ -7063,7 +7063,7 @@ var $author$project$Main$update = F2(
 										discard: $elm$core$Maybe$Just(
 											A2($author$project$Main$DiscardedTile, toDiscard, model.turn)),
 										message: 'processed game for ' + $elm$core$Debug$toString(model.turn),
-										turn: A2($elm$core$Basics$modBy, 4, model.turn + 1)
+										turn: A2($elm$core$Basics$modBy, 4, model.turn)
 									}),
 								$elm$core$Platform$Cmd$none);
 						}
@@ -7135,7 +7135,21 @@ var $author$project$Main$update = F2(
 					var _v11 = model.request;
 					if (_v11.$ === 'Nothing') {
 						if (!model.turn) {
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+							var _v12 = model.discard;
+							if (_v12.$ === 'Nothing') {
+								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+							} else {
+								var $temp$msg = $author$project$Main$RunGame,
+									$temp$model = _Utils_update(
+									model,
+									{
+										discard: $elm$core$Maybe$Nothing,
+										turn: A2($elm$core$Basics$modBy, 4, model.turn + 1)
+									});
+								msg = $temp$msg;
+								model = $temp$model;
+								continue update;
+							}
 						} else {
 							var $temp$msg = $author$project$Main$RunGame,
 								$temp$model = _Utils_update(
@@ -7150,10 +7164,10 @@ var $author$project$Main$update = F2(
 						}
 					} else {
 						var r = _v11.a;
-						var _v12 = r.attempt;
-						switch (_v12.$) {
+						var _v13 = r.attempt;
+						switch (_v13.$) {
 							case 'Hu':
-								var tiles = _v12.a;
+								var tiles = _v13.a;
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
@@ -7162,9 +7176,9 @@ var $author$project$Main$update = F2(
 										}),
 									$elm$core$Platform$Cmd$none);
 							case 'Gang':
-								var _v13 = _v12.a;
-								var gang = _v13.a;
-								var rest = _v13.b;
+								var _v14 = _v13.a;
+								var gang = _v14.a;
+								var rest = _v14.b;
 								var newModel = A3($author$project$Main$addShown, model, gang, r.requester);
 								var withNewTurn = _Utils_update(
 									newModel,
@@ -7175,9 +7189,9 @@ var $author$project$Main$update = F2(
 								model = $temp$model;
 								continue update;
 							case 'Peng':
-								var _v14 = _v12.a;
-								var peng = _v14.a;
-								var rest = _v14.b;
+								var _v15 = _v13.a;
+								var peng = _v15.a;
+								var rest = _v15.b;
 								var newModel = A3($author$project$Main$addShown, model, peng, r.requester);
 								var withNewTurn = _Utils_update(
 									newModel,
@@ -7188,9 +7202,9 @@ var $author$project$Main$update = F2(
 								model = $temp$model;
 								continue update;
 							default:
-								var _v15 = _v12.a;
-								var chi = _v15.a;
-								var rest = _v15.b;
+								var _v16 = _v13.a;
+								var chi = _v16.a;
+								var rest = _v16.b;
 								var newModel = A3($author$project$Main$addShown, model, chi, r.requester);
 								var withNewTurn = _Utils_update(
 									newModel,
@@ -7208,11 +7222,11 @@ var $author$project$Main$update = F2(
 						A2($author$project$Main$playerSelect, model, n),
 						$elm$core$Platform$Cmd$none);
 				case 'PlayerDiscard':
-					var _v16 = model.playerSelected;
-					if (_v16.$ === 'Nothing') {
+					var _v17 = model.playerSelected;
+					if (_v17.$ === 'Nothing') {
 						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					} else {
-						var t = _v16.a;
+						var t = _v17.a;
 						var newHand = A2($author$project$Tile$remove, t, model.playerHand);
 						var $temp$msg = $author$project$Main$RunGame,
 							$temp$model = _Utils_update(
@@ -7222,7 +7236,7 @@ var $author$project$Main$update = F2(
 									A2($author$project$Main$DiscardedTile, t, 0)),
 								playerHand: newHand,
 								playerSelected: $elm$core$Maybe$Nothing,
-								turn: A2($elm$core$Basics$modBy, 4, model.turn + 1)
+								turn: A2($elm$core$Basics$modBy, 4, model.turn)
 							});
 						msg = $temp$msg;
 						model = $temp$model;
@@ -7235,18 +7249,18 @@ var $author$project$Main$update = F2(
 							{message: 'you win!'}),
 						$elm$core$Platform$Cmd$none);
 				case 'PlayerGang':
-					var _v17 = model.gangTiles;
-					if (_v17.$ === 'Nothing') {
+					var _v18 = model.gangTiles;
+					if (_v18.$ === 'Nothing') {
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 541, column: 11},
-								end: {line: 541, column: 21}
+								start: {line: 549, column: 11},
+								end: {line: 549, column: 21}
 							})('impossible! check RunGame behavior for player, strategy calls');
 					} else {
-						var _v18 = _v17.a;
-						var g = _v18.a;
-						var r = _v18.b;
+						var _v19 = _v18.a;
+						var g = _v19.a;
+						var r = _v19.b;
 						var $temp$msg = $author$project$Main$CheckRequests,
 							$temp$model = _Utils_update(
 							model,
@@ -7263,20 +7277,20 @@ var $author$project$Main$update = F2(
 						continue update;
 					}
 				case 'PlayerPeng':
-					var _v19 = model.pengTiles;
-					if (_v19.$ === 'Nothing') {
+					var _v20 = model.pengTiles;
+					if (_v20.$ === 'Nothing') {
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 550, column: 11},
-								end: {line: 550, column: 21}
+								start: {line: 558, column: 11},
+								end: {line: 558, column: 21}
 							})('impossible! check RunGame behavior for player, strategy calls');
 					} else {
-						var _v20 = _v19.a;
-						var p = _v20.a;
-						var r = _v20.b;
-						var _v21 = model.request;
-						if (_v21.$ === 'Nothing') {
+						var _v21 = _v20.a;
+						var p = _v21.a;
+						var r = _v21.b;
+						var _v22 = model.request;
+						if (_v22.$ === 'Nothing') {
 							var $temp$msg = $author$project$Main$CheckRequests,
 								$temp$model = _Utils_update(
 								model,
@@ -7292,9 +7306,9 @@ var $author$project$Main$update = F2(
 							model = $temp$model;
 							continue update;
 						} else {
-							var req = _v21.a;
-							var _v22 = req.attempt;
-							if (_v22.$ === 'Gang') {
+							var req = _v22.a;
+							var _v23 = req.attempt;
+							if (_v23.$ === 'Gang') {
 								var $temp$msg = $author$project$Main$CheckRequests,
 									$temp$model = _Utils_update(
 									model,
@@ -7321,20 +7335,20 @@ var $author$project$Main$update = F2(
 						}
 					}
 				default:
-					var _v23 = model.pengTiles;
-					if (_v23.$ === 'Nothing') {
+					var _v24 = model.pengTiles;
+					if (_v24.$ === 'Nothing') {
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 571, column: 11},
-								end: {line: 571, column: 21}
+								start: {line: 579, column: 11},
+								end: {line: 579, column: 21}
 							})('impossible! check RunGame behavior for player, strategy calls');
 					} else {
-						var _v24 = _v23.a;
-						var c = _v24.a;
-						var r = _v24.b;
-						var _v25 = model.request;
-						if (_v25.$ === 'Nothing') {
+						var _v25 = _v24.a;
+						var c = _v25.a;
+						var r = _v25.b;
+						var _v26 = model.request;
+						if (_v26.$ === 'Nothing') {
 							var $temp$msg = $author$project$Main$CheckRequests,
 								$temp$model = _Utils_update(
 								model,

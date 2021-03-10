@@ -414,7 +414,7 @@ update msg model =
                 | deck = newDeck
                 , discard = Just (DiscardedTile toDiscard model.turn)
                 , message = "processed game for " ++ Debug.toString model.turn
-                , turn = modBy 4 (model.turn + 1) }, Cmd.none)
+                , turn = modBy 4 (model.turn) }, Cmd.none)
         Just dt ->
           let
             (t, discarder) = (dt.tile, dt.discarder)
@@ -472,7 +472,15 @@ update msg model =
       case model.request of
         Nothing ->
           if model.turn == 0 then
-            (model, Cmd.none)
+            case model.discard of
+              Nothing ->
+                (model, Cmd.none)
+              _ ->
+                update
+                RunGame
+                { model
+                | turn = modBy 4 (model.turn + 1)
+                , discard = Nothing }
           else
             update
             RunGame
@@ -531,7 +539,7 @@ update msg model =
             | playerSelected = Nothing
             , discard = Just (DiscardedTile t 0)
             , playerHand = newHand
-            , turn = modBy 4 (model.turn + 1) }
+            , turn = modBy 4 (model.turn) }
     PlayerHu ->
       ( { model | message = "you win!" },
       Cmd.none )
