@@ -7208,40 +7208,40 @@ var $author$project$Main$update = F2(
 								var gang = _v14.a;
 								var rest = _v14.b;
 								var newModel = A3($author$project$Main$addShown, model, gang, r.requester);
-								var withNewTurn = _Utils_update(
-									newModel,
-									{request: $elm$core$Maybe$Nothing, turn: r.requester});
-								var $temp$msg = $author$project$Main$RunGame,
-									$temp$model = withNewTurn;
-								msg = $temp$msg;
-								model = $temp$model;
-								continue update;
+								var withNewTurn = A3(
+									$author$project$Main$updateHand,
+									_Utils_update(
+										newModel,
+										{request: $elm$core$Maybe$Nothing, turn: r.requester}),
+									rest,
+									r.requester);
+								return _Utils_Tuple2(withNewTurn, $elm$core$Platform$Cmd$none);
 							case 'Peng':
 								var _v15 = _v13.a;
 								var peng = _v15.a;
 								var rest = _v15.b;
 								var newModel = A3($author$project$Main$addShown, model, peng, r.requester);
-								var withNewTurn = _Utils_update(
-									newModel,
-									{request: $elm$core$Maybe$Nothing, turn: r.requester});
-								var $temp$msg = $author$project$Main$RunGame,
-									$temp$model = withNewTurn;
-								msg = $temp$msg;
-								model = $temp$model;
-								continue update;
+								var withNewTurn = A3(
+									$author$project$Main$updateHand,
+									_Utils_update(
+										newModel,
+										{request: $elm$core$Maybe$Nothing, turn: r.requester}),
+									rest,
+									r.requester);
+								return _Utils_Tuple2(withNewTurn, $elm$core$Platform$Cmd$none);
 							default:
 								var _v16 = _v13.a;
 								var chi = _v16.a;
 								var rest = _v16.b;
 								var newModel = A3($author$project$Main$addShown, model, chi, r.requester);
-								var withNewTurn = _Utils_update(
-									newModel,
-									{request: $elm$core$Maybe$Nothing, turn: r.requester});
-								var $temp$msg = $author$project$Main$RunGame,
-									$temp$model = withNewTurn;
-								msg = $temp$msg;
-								model = $temp$model;
-								continue update;
+								var withNewTurn = A3(
+									$author$project$Main$updateHand,
+									_Utils_update(
+										newModel,
+										{request: $elm$core$Maybe$Nothing, turn: r.requester}),
+									rest,
+									r.requester);
+								return _Utils_Tuple2(withNewTurn, $elm$core$Platform$Cmd$none);
 						}
 					}
 				case 'PlayerSelect':
@@ -7279,12 +7279,13 @@ var $author$project$Main$update = F2(
 				case 'PlayerGang':
 					var _v18 = model.gangTiles;
 					if (_v18.$ === 'Nothing') {
-						return _Debug_todo(
-							'Main',
-							{
-								start: {line: 569, column: 11},
-								end: {line: 569, column: 21}
-							})('impossible! check RunGame behavior for player, strategy calls');
+						var $temp$msg = $author$project$Main$CheckRequests,
+							$temp$model = _Utils_update(
+							model,
+							{message: 'big bad', playerHand: _List_Nil});
+						msg = $temp$msg;
+						model = $temp$model;
+						continue update;
 					} else {
 						var _v19 = _v18.a;
 						var g = _v19.a;
@@ -7307,12 +7308,13 @@ var $author$project$Main$update = F2(
 				case 'PlayerPeng':
 					var _v20 = model.pengTiles;
 					if (_v20.$ === 'Nothing') {
-						return _Debug_todo(
-							'Main',
-							{
-								start: {line: 578, column: 11},
-								end: {line: 578, column: 21}
-							})('impossible! check RunGame behavior for player, strategy calls');
+						var $temp$msg = $author$project$Main$CheckRequests,
+							$temp$model = _Utils_update(
+							model,
+							{message: 'big bad', playerHand: _List_Nil});
+						msg = $temp$msg;
+						model = $temp$model;
+						continue update;
 					} else {
 						var _v21 = _v20.a;
 						var p = _v21.a;
@@ -7365,12 +7367,13 @@ var $author$project$Main$update = F2(
 				default:
 					var _v24 = model.pengTiles;
 					if (_v24.$ === 'Nothing') {
-						return _Debug_todo(
-							'Main',
-							{
-								start: {line: 599, column: 11},
-								end: {line: 599, column: 21}
-							})('impossible! check RunGame behavior for player, strategy calls');
+						var $temp$msg = $author$project$Main$CheckRequests,
+							$temp$model = _Utils_update(
+							model,
+							{message: 'big bad', playerHand: _List_Nil});
+						msg = $temp$msg;
+						model = $temp$model;
+						continue update;
 					} else {
 						var _v25 = _v24.a;
 						var c = _v25.a;
@@ -7637,8 +7640,7 @@ var $author$project$Main$view = function (model) {
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(
-								$elm$core$Debug$toString(model))
+								$elm$html$Html$text(model.message)
 							])),
 						A2(
 						$elm$html$Html$div,

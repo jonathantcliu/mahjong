@@ -27,7 +27,7 @@ countTiles tiles newtile =
 -- if self is east, if discard is from 4
 -- otherwise if discard from (self - 1)
 
-removeSublist : List Tile -> List Tile -> List Tile
+removeSublist : List a -> List a -> List a
 removeSublist delete list =
   case list of
     [] ->

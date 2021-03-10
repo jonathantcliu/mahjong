@@ -118,7 +118,7 @@ view model =
   div []
     [ div [ attribute "class" "play-table-column" ]
       [ h1 [] [ text "🀄 Mahjong 🀄" ]
-      , div [ attribute "class" "message" ] [ text (Debug.toString model) ]
+      , div [ attribute "class" "message" ] [ text (model.message) ]
       , div [ attribute "class" "new-game" ]
         (if model.canNewGame then
           [ div [] [ button [ onClick (NewGame 0) ] [ text "Start as East" ] ]
@@ -495,7 +495,7 @@ update msg model =
             case model.discard of
               Nothing ->
                 (model, Cmd.none)
-              _ ->
+              _ -> -- player discarded something
                 update
                 RunGame
                 { model
@@ -515,33 +515,42 @@ update msg model =
             Gang (gang, rest) ->
               let
                 newModel = addShown model gang r.requester
-                withNewTurn = {newModel
-                                | turn = r.requester
-                                , request = Nothing }
+                withNewTurn = updateHand
+                              { newModel
+                              | turn = r.requester
+                              , request = Nothing }
+                              rest
+                              r.requester
               in
-                update
-                RunGame
-                withNewTurn
+                -- update
+                -- RunGame
+                (withNewTurn, Cmd.none)
             Peng (peng, rest) ->
               let
                 newModel = addShown model peng r.requester
-                withNewTurn = {newModel
-                                | turn = r.requester
-                                , request = Nothing }
+                withNewTurn = updateHand
+                              { newModel
+                              | turn = r.requester
+                              , request = Nothing }
+                              rest
+                              r.requester
               in
-                update
-                RunGame
-                withNewTurn
+                -- update
+                -- RunGame
+                (withNewTurn, Cmd.none)
             Chi (chi, rest) ->
               let
                 newModel = addShown model chi r.requester
-                withNewTurn = {newModel
-                                | turn = r.requester
-                                , request = Nothing }
+                withNewTurn = updateHand
+                              { newModel
+                              | turn = r.requester
+                              , request = Nothing }
+                              rest
+                              r.requester
               in
-                update
-                RunGame
-                withNewTurn
+                -- update
+                -- RunGame
+                (withNewTurn, Cmd.none)
     PlayerSelect n ->
       ( playerSelect model n
       , Cmd.none )
@@ -566,8 +575,11 @@ update msg model =
     PlayerGang ->
       case model.gangTiles of
         Nothing ->
-          Debug.todo
-            "impossible! check RunGame behavior for player, strategy calls"
+          update
+          CheckRequests
+          {model
+          | playerHand = []
+          , message = "big bad" }
         Just (g, r) ->
           update
           CheckRequests
@@ -575,8 +587,11 @@ update msg model =
     PlayerPeng ->
       case model.pengTiles of
         Nothing ->
-          Debug.todo
-            "impossible! check RunGame behavior for player, strategy calls"
+          update
+          CheckRequests
+          {model
+          | playerHand = []
+          , message = "big bad" }
         Just (p, r) ->
           case model.request of
             Nothing ->
@@ -596,8 +611,11 @@ update msg model =
     PlayerChi ->
       case model.pengTiles of
         Nothing ->
-          Debug.todo
-            "impossible! check RunGame behavior for player, strategy calls"
+          update
+          CheckRequests
+          {model
+          | playerHand = []
+          , message = "big bad" }
         Just (c, r) ->
           case model.request of
             Nothing ->
