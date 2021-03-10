@@ -82,17 +82,17 @@ countSequences tiles =
           (number, sequences, List.reverse (second::first::leftover))
         -- potentially successful case
         -- need to check if 1, 1, 2, 2, 3, 3 returns 2 for (1, 2, 3, 1, 2, 3)
-        first::second::third::rest ->
-          if second == first + 1 && third == first + 2 then
+        first::rest ->
+          if List.member (first + 1) rest && List.member (first + 2) rest then
+            loop
+            (Tile.remove (first + 2) (Tile.remove (first + 1) rest))
+            (number + 1)
+            ([first, first + 1, first + 2]::sequences)
+            leftover
+          else
             loop
             rest
-            (number + 1)
-            ([first, second, third]::sequences)
-            leftover
-          else -- numbers didn't work out
-            loop
-            (second::third::rest)
-            (number)
+            number
             sequences
             (first::leftover)
   in
@@ -147,8 +147,8 @@ countGang tiles newtile =
 handleNumbered : List Tile -> (Int, List Tile)
 handleNumbered tiles =
   let
-    (pengNumber, pengs, leftover) = countPeng tiles
-    (seqNumber, sequences, leftover2) = countSequences leftover
+    (pengNumber, pengs, leftover) = countSequences tiles --countPeng
+    (seqNumber, sequences, leftover2) = countPeng leftover --countSequences
   in
     (pengNumber + seqNumber, leftover2)
 

@@ -5910,6 +5910,49 @@ var $author$project$Strategy$mapOnListList = F2(
 				A2($author$project$Strategy$mapOnListList, rest, suit));
 		}
 	});
+var $elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
+		}
+	});
+var $elm$core$List$member = F2(
+	function (x, xs) {
+		return A2(
+			$elm$core$List$any,
+			function (a) {
+				return _Utils_eq(a, x);
+			},
+			xs);
+	});
+var $author$project$Tile$remove = F2(
+	function (x, xs) {
+		if (!xs.b) {
+			return _List_Nil;
+		} else {
+			var first = xs.a;
+			var rest = xs.b;
+			return _Utils_eq(first, x) ? rest : A2(
+				$elm$core$List$cons,
+				first,
+				A2($author$project$Tile$remove, x, rest));
+		}
+	});
 var $elm$core$List$sortBy = _List_sortBy;
 var $elm$core$List$sort = function (xs) {
 	return A2($elm$core$List$sortBy, $elm$core$Basics$identity, xs);
@@ -5987,18 +6030,17 @@ var $author$project$Strategy$countSequences = function (tiles) {
 										A2($elm$core$List$cons, first, leftover))));
 						} else {
 							var first = l.a;
-							var _v2 = l.b;
-							var second = _v2.a;
-							var _v3 = _v2.b;
-							var third = _v3.a;
-							var rest = _v3.b;
-							if (_Utils_eq(second, first + 1) && _Utils_eq(third, first + 2)) {
-								var $temp$l = rest,
+							var rest = l.b;
+							if (A2($elm$core$List$member, first + 1, rest) && A2($elm$core$List$member, first + 2, rest)) {
+								var $temp$l = A2(
+									$author$project$Tile$remove,
+									first + 2,
+									A2($author$project$Tile$remove, first + 1, rest)),
 									$temp$number = number + 1,
 									$temp$sequences = A2(
 									$elm$core$List$cons,
 									_List_fromArray(
-										[first, second, third]),
+										[first, first + 1, first + 2]),
 									sequences),
 									$temp$leftover = leftover;
 								l = $temp$l;
@@ -6007,10 +6049,7 @@ var $author$project$Strategy$countSequences = function (tiles) {
 								leftover = $temp$leftover;
 								continue loop;
 							} else {
-								var $temp$l = A2(
-									$elm$core$List$cons,
-									second,
-									A2($elm$core$List$cons, third, rest)),
+								var $temp$l = rest,
 									$temp$number = number,
 									$temp$sequences = sequences,
 									$temp$leftover = A2($elm$core$List$cons, first, leftover);
@@ -6029,10 +6068,10 @@ var $author$project$Strategy$countSequences = function (tiles) {
 		return _Utils_Tuple3(0, _List_Nil, _List_Nil);
 	} else {
 		var tile = original.a;
-		var _v5 = A4(loop, sortednumbers, 0, _List_Nil, _List_Nil);
-		var ct = _v5.a;
-		var seqs = _v5.b;
-		var unused = _v5.c;
+		var _v3 = A4(loop, sortednumbers, 0, _List_Nil, _List_Nil);
+		var ct = _v3.a;
+		var seqs = _v3.b;
+		var unused = _v3.c;
 		return _Utils_Tuple3(
 			ct,
 			A2($author$project$Strategy$mapOnListList, seqs, tile.suit),
@@ -6048,27 +6087,17 @@ var $author$project$Strategy$countSequences = function (tiles) {
 	}
 };
 var $author$project$Strategy$handleNumbered = function (tiles) {
-	var _v0 = $author$project$Strategy$countPeng(tiles);
+	var _v0 = $author$project$Strategy$countSequences(tiles);
 	var pengNumber = _v0.a;
 	var pengs = _v0.b;
 	var leftover = _v0.c;
-	var _v1 = $author$project$Strategy$countSequences(leftover);
+	var _v1 = $author$project$Strategy$countPeng(leftover);
 	var seqNumber = _v1.a;
 	var sequences = _v1.b;
 	var leftover2 = _v1.c;
 	return _Utils_Tuple2(pengNumber + seqNumber, leftover2);
 };
-var $author$project$Strategy$handleNumberedPrime = function (tiles) {
-	var _v0 = $author$project$Strategy$countSequences(tiles);
-	var seqNumber = _v0.a;
-	var sequences = _v0.b;
-	var leftover = _v0.c;
-	var _v1 = $author$project$Strategy$countPeng(leftover);
-	var pengNumber = _v1.a;
-	var pengs = _v1.b;
-	var leftover2 = _v1.c;
-	return _Utils_Tuple2(seqNumber + pengNumber, leftover2);
-};
+var $elm$core$Debug$log = _Debug_log;
 var $author$project$Strategy$checkWin = F2(
 	function (tiles, declared) {
 		var numbered = _List_fromArray(
@@ -6090,17 +6119,20 @@ var $author$project$Strategy$checkWin = F2(
 		var dNum = _v1.a;
 		var dPengs = _v1.b;
 		var dRest = _v1.c;
-		var tuples = _Utils_ap(
-			numbered,
+		var tuples = A2(
+			$elm$core$Debug$log,
+			'tuples',
 			_Utils_ap(
-				_List_fromArray(
-					[
-						_Utils_Tuple2(wNum, wRest)
-					]),
-				_List_fromArray(
-					[
-						_Utils_Tuple2(dNum, dRest)
-					])));
+				numbered,
+				_Utils_ap(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(wNum, wRest)
+						]),
+					_List_fromArray(
+						[
+							_Utils_Tuple2(dNum, dRest)
+						]))));
 		var _v2 = $author$project$Strategy$combineTuples(tuples);
 		var melds = _v2.a;
 		var leftover = _v2.b;
@@ -6110,37 +6142,7 @@ var $author$project$Strategy$checkWin = F2(
 			var eye2 = _v4.a;
 			return _Utils_eq(eye1, eye2) && ((melds + declared) === 4);
 		} else {
-			var numberedPrime = _List_fromArray(
-				[
-					$author$project$Strategy$handleNumberedPrime(
-					A2($author$project$Tile$collect, $author$project$Tile$Dots, tiles)),
-					$author$project$Strategy$handleNumberedPrime(
-					A2($author$project$Tile$collect, $author$project$Tile$Bamboo, tiles)),
-					$author$project$Strategy$handleNumberedPrime(
-					A2($author$project$Tile$collect, $author$project$Tile$Characters, tiles))
-				]);
-			var tuples2 = _Utils_ap(
-				numberedPrime,
-				_Utils_ap(
-					_List_fromArray(
-						[
-							_Utils_Tuple2(wNum, wRest)
-						]),
-					_List_fromArray(
-						[
-							_Utils_Tuple2(dNum, dRest)
-						])));
-			var _v5 = $author$project$Strategy$combineTuples(tuples2);
-			var melds2 = _v5.a;
-			var leftover2 = _v5.b;
-			if ((leftover2.b && leftover2.b.b) && (!leftover2.b.b.b)) {
-				var eye1 = leftover2.a;
-				var _v7 = leftover2.b;
-				var eye2 = _v7.a;
-				return _Utils_eq(eye1, eye2) && ((melds2 + declared) === 4);
-			} else {
-				return false;
-			}
+			return false;
 		}
 	});
 var $author$project$Strategy$countGang = F2(
@@ -6418,19 +6420,6 @@ var $author$project$Strategy$findDiscardOrdinal = function (tiles) {
 		}
 	}
 };
-var $author$project$Tile$remove = F2(
-	function (x, xs) {
-		if (!xs.b) {
-			return _List_Nil;
-		} else {
-			var first = xs.a;
-			var rest = xs.b;
-			return _Utils_eq(first, x) ? rest : A2(
-				$elm$core$List$cons,
-				first,
-				A2($author$project$Tile$remove, x, rest));
-		}
-	});
 var $author$project$Strategy$findDiscard = function (tiles) {
 	var discards = _List_fromArray(
 		[
@@ -6452,8 +6441,8 @@ var $author$project$Strategy$findDiscard = function (tiles) {
 			return _Debug_todo(
 				'Strategy',
 				{
-					start: {line: 244, column: 13},
-					end: {line: 244, column: 23}
+					start: {line: 225, column: 13},
+					end: {line: 225, column: 23}
 				})('Exception: discard called on empty');
 		} else {
 			var ft = _v1.a;
@@ -6519,27 +6508,6 @@ var $author$project$Main$playerSelect = F2(
 					message: 'selected ' + $elm$core$Debug$toString(t),
 					playerSelected: $elm$core$Maybe$Just(t)
 				});
-		}
-	});
-var $elm$core$List$any = F2(
-	function (isOkay, list) {
-		any:
-		while (true) {
-			if (!list.b) {
-				return false;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				if (isOkay(x)) {
-					return true;
-				} else {
-					var $temp$isOkay = isOkay,
-						$temp$list = xs;
-					isOkay = $temp$isOkay;
-					list = $temp$list;
-					continue any;
-				}
-			}
 		}
 	});
 var $author$project$Strategy$removeSublist = F2(
