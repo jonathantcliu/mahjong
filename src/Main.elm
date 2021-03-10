@@ -139,27 +139,27 @@ view model =
         , tbody []
           [ tr []
             [ td []
-              (makeSpans (Tile.showPlayerHand model.cpu1Shown) 200)
+              (makeSpans (Tile.showPlayerHand model.cpu1Shown) 50)
             , td []
-              (makeSpans (Tile.showPlayerHand model.cpu2Shown) 200)
+              (makeSpans (Tile.showPlayerHand model.cpu2Shown) 50)
             , td []
-              (makeSpans (Tile.showPlayerHand model.cpu3Shown) 200)
+              (makeSpans (Tile.showPlayerHand model.cpu3Shown) 50)
             ]
           ]
           , tr []
             [ td []
-              (makeSpans (Tile.showCPUHand model.cpu1Hand) 200)
+              (makeSpans (Tile.showPlayerHand model.cpu1Hand) 200) -- showCPUHand
             , td []
-              (makeSpans (Tile.showCPUHand model.cpu2Hand) 200)
+              (makeSpans (Tile.showPlayerHand model.cpu2Hand) 200)
             , td []
-              (makeSpans (Tile.showCPUHand model.cpu3Hand) 200)
+              (makeSpans (Tile.showPlayerHand model.cpu3Hand) 200)
           ]
         ]
       ]
     , table [ attribute "class" "discardtile" ]
       [ thead []
         [ tr []
-          [ th [] (makeDiscardSpan model.discard 100)
+          [ th [] (makeDiscardSpan model.discard 50)
           ]
         ]
       ]
@@ -482,7 +482,8 @@ update msg model =
                 updateHand model (Tile.sortHand newHand) model.turn
             in
               ( { updatedModel
-                  | deck = newDeck },
+                  | deck = newDeck
+                  , message = "dealt tile to player"},
               Cmd.none ) --check if canHu, canGang here
           else
             let
@@ -494,6 +495,7 @@ update msg model =
               ( { updatedModel
                   | deck = newDeck
                   , discard = Just (DiscardedTile toDiscard model.turn)
+                  , message = "processed game for " ++ Debug.toString model.turn
                   , turn = modBy 4 (model.turn + 1) }
               , Cmd.none )
         Just dt ->
@@ -551,7 +553,10 @@ update msg model =
     CheckRequests ->
       case model.request of
         Nothing ->
-          update RunGame { model | turn = modBy 4 (model.turn + 1) }
+          if model.turn == 0 then
+            (model, Cmd.none)
+          else
+            update RunGame { model | turn = modBy 4 (model.turn + 1) }
         Just r ->
           case r.attempt of
             Hu tiles ->
@@ -564,7 +569,9 @@ update msg model =
                                 | turn = r.requester
                                 , request = Nothing }
               in
-                (withNewTurn, Cmd.none)
+                update
+                RunGame
+                withNewTurn
             Peng (peng, rest) ->
               let
                 newModel = addShown model peng r.requester
@@ -572,7 +579,9 @@ update msg model =
                                 | turn = r.requester
                                 , request = Nothing }
               in
-                (withNewTurn, Cmd.none)
+                update
+                RunGame
+                withNewTurn
             Chi (chi, rest) ->
               let
                 newModel = addShown model chi r.requester
@@ -580,7 +589,9 @@ update msg model =
                                 | turn = r.requester
                                 , request = Nothing }
               in
-                (withNewTurn, Cmd.none)
+                update
+                RunGame
+                withNewTurn
     PlayerSelect n ->
       ( playerSelect model n
       , Cmd.none)

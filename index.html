@@ -7287,7 +7287,7 @@ var $author$project$Main$update = F2(
 							return _Utils_Tuple2(
 								_Utils_update(
 									updatedModel,
-									{deck: newDeck}),
+									{deck: newDeck, message: 'dealt tile to player'}),
 								$elm$core$Platform$Cmd$none);
 						} else {
 							var _v3 = A3(
@@ -7308,6 +7308,7 @@ var $author$project$Main$update = F2(
 										deck: newDeck,
 										discard: $elm$core$Maybe$Just(
 											A2($author$project$Main$DiscardedTile, toDiscard, model.turn)),
+										message: 'processed game for ' + $elm$core$Debug$toString(model.turn),
 										turn: A2($elm$core$Basics$modBy, 4, model.turn + 1)
 									}),
 								$elm$core$Platform$Cmd$none);
@@ -7379,15 +7380,19 @@ var $author$project$Main$update = F2(
 				case 'CheckRequests':
 					var _v11 = model.request;
 					if (_v11.$ === 'Nothing') {
-						var $temp$msg = $author$project$Main$RunGame,
-							$temp$model = _Utils_update(
-							model,
-							{
-								turn: A2($elm$core$Basics$modBy, 4, model.turn + 1)
-							});
-						msg = $temp$msg;
-						model = $temp$model;
-						continue update;
+						if (!model.turn) {
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						} else {
+							var $temp$msg = $author$project$Main$RunGame,
+								$temp$model = _Utils_update(
+								model,
+								{
+									turn: A2($elm$core$Basics$modBy, 4, model.turn + 1)
+								});
+							msg = $temp$msg;
+							model = $temp$model;
+							continue update;
+						}
 					} else {
 						var r = _v11.a;
 						var _v12 = r.attempt;
@@ -7409,7 +7414,11 @@ var $author$project$Main$update = F2(
 								var withNewTurn = _Utils_update(
 									newModel,
 									{request: $elm$core$Maybe$Nothing, turn: r.requester});
-								return _Utils_Tuple2(withNewTurn, $elm$core$Platform$Cmd$none);
+								var $temp$msg = $author$project$Main$RunGame,
+									$temp$model = withNewTurn;
+								msg = $temp$msg;
+								model = $temp$model;
+								continue update;
 							case 'Peng':
 								var _v14 = _v12.a;
 								var peng = _v14.a;
@@ -7418,7 +7427,11 @@ var $author$project$Main$update = F2(
 								var withNewTurn = _Utils_update(
 									newModel,
 									{request: $elm$core$Maybe$Nothing, turn: r.requester});
-								return _Utils_Tuple2(withNewTurn, $elm$core$Platform$Cmd$none);
+								var $temp$msg = $author$project$Main$RunGame,
+									$temp$model = withNewTurn;
+								msg = $temp$msg;
+								model = $temp$model;
+								continue update;
 							default:
 								var _v15 = _v12.a;
 								var chi = _v15.a;
@@ -7427,7 +7440,11 @@ var $author$project$Main$update = F2(
 								var withNewTurn = _Utils_update(
 									newModel,
 									{request: $elm$core$Maybe$Nothing, turn: r.requester});
-								return _Utils_Tuple2(withNewTurn, $elm$core$Platform$Cmd$none);
+								var $temp$msg = $author$project$Main$RunGame,
+									$temp$model = withNewTurn;
+								msg = $temp$msg;
+								model = $temp$model;
+								continue update;
 						}
 					}
 				case 'PlayerSelect':
@@ -7468,8 +7485,8 @@ var $author$project$Main$update = F2(
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 608, column: 11},
-								end: {line: 608, column: 21}
+								start: {line: 619, column: 11},
+								end: {line: 619, column: 21}
 							})('impossible! check RunGame behavior for player, strategy calls');
 					} else {
 						var _v18 = _v17.a;
@@ -7496,8 +7513,8 @@ var $author$project$Main$update = F2(
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 617, column: 11},
-								end: {line: 617, column: 21}
+								start: {line: 628, column: 11},
+								end: {line: 628, column: 21}
 							})('impossible! check RunGame behavior for player, strategy calls');
 					} else {
 						var _v20 = _v19.a;
@@ -7554,8 +7571,8 @@ var $author$project$Main$update = F2(
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 638, column: 11},
-								end: {line: 638, column: 21}
+								start: {line: 649, column: 11},
+								end: {line: 649, column: 21}
 							})('impossible! check RunGame behavior for player, strategy calls');
 					} else {
 						var _v24 = _v23.a;
@@ -7788,14 +7805,6 @@ var $author$project$Main$makePlayerSpans = F2(
 		return A2($elm$core$List$indexedMap, spanmaker, hand);
 	});
 var $elm$core$Basics$not = _Basics_not;
-var $author$project$Tile$showCPUHand = function (hand) {
-	return A2(
-		$elm$core$List$map,
-		function (t) {
-			return '🀫';
-		},
-		hand);
-};
 var $elm$html$Html$table = _VirtualDom_node('table');
 var $elm$html$Html$tbody = _VirtualDom_node('tbody');
 var $elm$html$Html$td = _VirtualDom_node('td');
@@ -7937,21 +7946,21 @@ var $author$project$Main$view = function (model) {
 												A2(
 													$author$project$Main$makeSpans,
 													$author$project$Tile$showPlayerHand(model.cpu1Shown),
-													200)),
+													50)),
 												A2(
 												$elm$html$Html$td,
 												_List_Nil,
 												A2(
 													$author$project$Main$makeSpans,
 													$author$project$Tile$showPlayerHand(model.cpu2Shown),
-													200)),
+													50)),
 												A2(
 												$elm$html$Html$td,
 												_List_Nil,
 												A2(
 													$author$project$Main$makeSpans,
 													$author$project$Tile$showPlayerHand(model.cpu3Shown),
-													200))
+													50))
 											]))
 									])),
 								A2(
@@ -7964,21 +7973,21 @@ var $author$project$Main$view = function (model) {
 										_List_Nil,
 										A2(
 											$author$project$Main$makeSpans,
-											$author$project$Tile$showCPUHand(model.cpu1Hand),
+											$author$project$Tile$showPlayerHand(model.cpu1Hand),
 											200)),
 										A2(
 										$elm$html$Html$td,
 										_List_Nil,
 										A2(
 											$author$project$Main$makeSpans,
-											$author$project$Tile$showCPUHand(model.cpu2Hand),
+											$author$project$Tile$showPlayerHand(model.cpu2Hand),
 											200)),
 										A2(
 										$elm$html$Html$td,
 										_List_Nil,
 										A2(
 											$author$project$Main$makeSpans,
-											$author$project$Tile$showCPUHand(model.cpu3Hand),
+											$author$project$Tile$showPlayerHand(model.cpu3Hand),
 											200))
 									]))
 							]))
@@ -8004,7 +8013,7 @@ var $author$project$Main$view = function (model) {
 										A2(
 										$elm$html$Html$th,
 										_List_Nil,
-										A2($author$project$Main$makeDiscardSpan, model.discard, 100))
+										A2($author$project$Main$makeDiscardSpan, model.discard, 50))
 									]))
 							]))
 					])),
