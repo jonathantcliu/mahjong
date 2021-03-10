@@ -118,7 +118,8 @@ view model =
   div []
     [ div [ attribute "class" "play-table-column" ]
       [ h1 [] [ text "🀄 Mahjong 🀄" ]
-      , div [ attribute "class" "message" ] [ text (model.message) ]
+      , div [ attribute "class" "message" ]
+        [ text (model.message ++ " " ++ Debug.toString (model.gangTiles) ++ " " ++ Debug.toString (model.pengTiles) ++ " " ++ Debug.toString (model.chiTiles)) ]
       , div [ attribute "class" "new-game" ]
         (if model.canNewGame then
           [ div [] [ button [ onClick (NewGame 0) ] [ text "Start as East" ] ]
@@ -367,8 +368,8 @@ playerSelect model n =
         model
       Just t ->
         { model
-          | playerSelected = Just t
-          , message = "selected " ++ Debug.toString t }
+          | playerSelected = Just t }
+          --, message = "selected " ++ Debug.toString t }
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -405,11 +406,11 @@ update msg model =
                   , canHu = hu
                   , canGang = False --暗杠?
                   , canPeng = False
-                  , canChi = False
-                  , gangTiles = Nothing
-                  , pengTiles = Nothing
-                  , chiTiles = Nothing
-                  , message = "dealt tile to player" },
+                  , canChi = False },
+                  --, gangTiles = Nothing
+                  --, pengTiles = Nothing
+                  --, chiTiles = Nothing
+                  --, message = "dealt tile to player" },
               Cmd.none )
           else
             let
@@ -423,7 +424,7 @@ update msg model =
               { updatedModel
                 | deck = newDeck
                 , discard = Just (DiscardedTile toDiscard model.turn)
-                , message = "processed game for " ++ Debug.toString model.turn
+                --, message = "processed game for " ++ Debug.toString model.turn
                 , turn = modBy 4 (model.turn) }
               {-
               ( { updatedModel
@@ -479,7 +480,9 @@ update msg model =
                                && discarder == 3
                     , gangTiles = gangT
                     , pengTiles = pengT
-                    , chiTiles = chiT },
+                    , chiTiles = chiT
+                    , message = Debug.toString pengs ++ " " ++ Debug.toString seqs },
+                    --, message = "updated canGang etc." },
                 Cmd.none )
               -- ( { model | message = "HELLO" } , Cmd.none) --check if player can hu, gang, peng, chi, update canHu canGang, etc.
               -- need to update attemptTiles with the tiles for Gang, Peng, etc.
@@ -518,7 +521,11 @@ update msg model =
                 withNewTurn = updateHand
                               { newModel
                               | turn = r.requester
-                              , request = Nothing }
+                              , canGang = False
+                              , canPeng = False
+                              , canChi = False
+                              , request = Nothing
+                              , discard = Nothing }
                               rest
                               r.requester
               in
@@ -531,7 +538,11 @@ update msg model =
                 withNewTurn = updateHand
                               { newModel
                               | turn = r.requester
-                              , request = Nothing }
+                              , canGang = False
+                              , canPeng = False
+                              , canChi = False
+                              , request = Nothing
+                              , discard = Nothing }
                               rest
                               r.requester
               in
@@ -544,7 +555,11 @@ update msg model =
                 withNewTurn = updateHand
                               { newModel
                               | turn = r.requester
-                              , request = Nothing }
+                              , canGang = False
+                              , canPeng = False
+                              , canChi = False
+                              , request = Nothing
+                              , discard = Nothing }
                               rest
                               r.requester
               in
@@ -579,7 +594,7 @@ update msg model =
           CheckRequests
           {model
           | playerHand = []
-          , message = "big bad" }
+          , message = model.message ++ " big bad" }
         Just (g, r) ->
           update
           CheckRequests
@@ -589,9 +604,9 @@ update msg model =
         Nothing ->
           update
           CheckRequests
-          {model
+          { model
           | playerHand = []
-          , message = "big bad" }
+          , message = model.message ++ " big bad" }
         Just (p, r) ->
           case model.request of
             Nothing ->
@@ -603,19 +618,20 @@ update msg model =
                 Gang _ ->
                   update
                   CheckRequests
-                  { model | message = "overruled"}
+                  model
+                  --{ model | message = "overruled" }
                 _ ->
                   update
                   CheckRequests
                   { model | request = Just (Request (Peng (p, r)) 0) }
     PlayerChi ->
-      case model.pengTiles of
+      case model.chiTiles of
         Nothing ->
           update
           CheckRequests
-          {model
+          { model
           | playerHand = []
-          , message = "big bad" }
+          , message = model.message ++ " big bad" }
         Just (c, r) ->
           case model.request of
             Nothing ->
@@ -625,7 +641,8 @@ update msg model =
             _ ->
               update
               CheckRequests
-              { model | message = "overruled"}
+              model
+              --{ model | message = "overruled" }
     --_ ->
       -- PlayerGang, PlayerPeng, PlayerChi - get gangTiles, pengTiles, chiTiles
       -- add to requests if can overrule requests, call CheckRequests no matter what
@@ -635,7 +652,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Time.every 5000 (Basics.always CheckRequests)
+  Time.every 1000 (Basics.always CheckRequests)
 
 main : Program () Model Msg
 main =
