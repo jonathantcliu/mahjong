@@ -273,7 +273,21 @@ withDiscard tile tiles declared =
                   (Peng (pengsWithTile, removeSublist pengsWithTile hand))
                 [] ->
                   let
-                    (seqCount, seqs, seqrest) = countSequences hand
+                    (seqCount, seqs, seqrest) =
+                      (
+                        case tile.suit of
+                          Dots ->
+                            countSequences
+                              (Tile.collect Dots hand)
+                          Bamboo ->
+                            countSequences
+                              (Tile.collect Bamboo hand)
+                          Characters ->
+                            countSequences
+                              (Tile.collect Characters hand)
+                          _ ->
+                            (0, [], [])
+                      )
                     seqsWithTile = getMeldWith seqs tile
                   in
                     case seqsWithTile of

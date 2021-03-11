@@ -373,6 +373,81 @@ playerSelect model n =
           | playerSelected = Just t }
           --, message = "selected " ++ Debug.toString t }
 
+getMove : Model -> Int -> Tile -> Int -> (Model, Cmd Msg)
+getMove m cpu t discarder =
+    if cpu > 3 then (m, Cmd.none)
+    else if cpu == discarder then getMove m (cpu + 1) t discarder
+    else
+      let
+        attempt = Strategy.withDiscard t (getHand m cpu) (getMelds m cpu)
+      in
+        case attempt of
+          Nothing ->
+            getMove m (cpu + 1) t discarder
+          Just a ->
+            case a of
+              Hu _ ->
+                ({ m
+                   | message = "game over, CPU " ++
+                               Debug.toString cpu ++
+                               "wins!" },
+                Cmd.none)
+              Gang (gang, rest) -> -- overrules anything except for Hu
+                -- let
+                -- newModel = updateHand m rest cpu
+                -- in
+                getMove
+                { m | request = Just (Request (Gang (gang, rest)) cpu) }
+                (cpu + 1)
+                t
+                discarder
+              Peng (peng, rest) ->
+                case m.request of
+                  Just g ->
+                    case g.attempt of
+                      Gang (_, _) ->
+                        getMove
+                        { m | message = "overruled"}
+                        (cpu + 1)
+                        t
+                        discarder
+                      _ ->
+                        getMove
+                        { m
+                          | request = Just (Request (Peng (peng, rest)) cpu) }
+                        (cpu + 1)
+                        t
+                        discarder
+                  Nothing ->
+                    getMove
+                    { m
+                      | request = Just (Request (Peng (peng, rest)) cpu) }
+                    (cpu + 1)
+                    t
+                    discarder
+              Chi (chi, rest) ->
+                case m.request of
+                  Nothing ->
+                    if discarder == modBy 4 (cpu + 3) then
+                      getMove
+                      { m
+                        | request = Just (Request (Chi (chi, rest)) cpu) }
+                      (cpu + 1)
+                      t
+                      discarder
+                    else
+                      getMove
+                      { m | message = "chi not allowed" }
+                      (cpu + 1)
+                      t
+                      discarder
+                  _ ->
+                    getMove
+                    { m | message = "overruled"}
+                    (cpu + 1)
+                    t
+                    discarder
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
@@ -456,7 +531,7 @@ update msg model =
             let
               (t, discarder) = (dt.tile, dt.discarder)
             in
-              if discarder == 0 || model.canNewGame then
+              if discarder == 0 || model.canNewGame then -- add cpu behavior here! 2021/03/11
                 (model, Cmd.none)
               else
                 let
@@ -465,16 +540,7 @@ update msg model =
                   (gangs, gangrest) = Strategy.countGang model.playerHand t
                   (pengCount, pengs, pengrest) =
                     Strategy.countPeng hand
-                  getFirstWith melds tile =
-                    case melds of
-                      [] ->
-                        Nothing
-                      m::mRest ->
-                        if List.member tile m then
-                          Just m
-                        else getFirstWith mRest tile
-                  -- pengsWithTile = Strategy.getMeldWith pengs t
-                  pengsWithTile = getFirstWith pengs t
+                  pengsWithTile = Strategy.getMeldWith pengs t
                   (seqCount, seqs, seqrest) =
                     case t.suit of
                       Dots ->
@@ -485,8 +551,7 @@ update msg model =
                         Strategy.countSequences (Tile.collect Characters hand)
                       _ ->
                         (0, [], [])
-                  -- seqsWithTile = Strategy.getMeldWith seqs t
-                  seqsWithTile = getFirstWith seqs t
+                  seqsWithTile = Strategy.getMeldWith seqs t
                   gangT =
                     (
                       if gangs == [] then Nothing else Just (gangs, gangrest)
@@ -494,27 +559,25 @@ update msg model =
                   pengT =
                     (
                       case pengsWithTile of
-                        Nothing ->
+                        [] ->
                           Nothing
-                        Just l ->
-                          Just ( l
-                               , Strategy.removeSublist l hand )
+                        l ->
+                          Just (l, Strategy.removeSublist l hand)
                     )
                   chiT =
                     (
                       case seqsWithTile of
-                        Nothing ->
+                        [] ->
                           Nothing
-                        Just l ->
-                          Just ( l
-                               , Strategy.removeSublist l hand )
+                        l ->
+                          Just (l, Strategy.removeSublist l hand)
                     )
                 in
                   ( { model
                       | canHu = hu
                       , canGang = Strategy.checkForGang model.playerHand t
                       , canPeng = Strategy.checkForPeng model.playerHand t
-                      , canChi = seqsWithTile /= Nothing && discarder == 3
+                      , canChi = seqsWithTile /= [] && discarder == 3
                       , gangTiles = gangT
                       , pengTiles = pengT
                       , chiTiles = chiT
