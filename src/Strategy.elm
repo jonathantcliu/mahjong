@@ -347,3 +347,21 @@ testHand3 =
   , Tile Red Dragons
   , Tile Red Dragons
   , Tile Red Dragons ]
+
+testHand4 : List Tile
+testHand4 =
+  [ Tile Three Bamboo
+  , Tile Four Dots
+  , Tile Five Dots
+  , Tile Seven Dots
+  , Tile Four Bamboo
+  , Tile Six Bamboo
+  , Tile Six Bamboo
+  , Tile Red Dragons
+  , Tile Red Dragons
+  , Tile Green Dragons
+  , Tile Green Dragons
+  , Tile Green Dragons
+  , Tile White Dragons
+  , Tile White Dragons
+  ]

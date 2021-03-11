@@ -39,6 +39,7 @@ type alias Model =
   , canGang : Bool
   , canPeng : Bool
   , canChi : Bool
+  , justMelded : Bool
   , gangTiles : Maybe (List Tile, List Tile)
   , pengTiles : Maybe (List Tile, List Tile)
   , chiTiles : Maybe (List Tile, List Tile) }
@@ -85,6 +86,7 @@ init _ =
       , canGang = False
       , canPeng = False
       , canChi = False
+      , justMelded = False
       , gangTiles = Nothing
       , pengTiles = Nothing
       , chiTiles = Nothing }
@@ -173,7 +175,7 @@ view model =
       , tbody []
         [ tr []
           [ td []
-            (makePlayerSpans (Tile.showPlayerHand model.playerShown) 75)
+            (makePlayerSpans (Tile.showPlayerHand model.playerShown) 100)
           ]
         ]
         , tr []
@@ -394,24 +396,27 @@ update msg model =
       case model.discard of
         Nothing ->
           if model.turn == 0 then
-            let
-              (newHand, newDeck)
-                = Tile.deal (getHand model model.turn) model.deck 1
-              hu = Strategy.checkWin newHand model.playerMelds
-              updatedModel =
-                updateHand model (Tile.sortHand newHand) model.turn
-            in
-              ( { updatedModel
-                  | deck = newDeck
-                  , canHu = hu
-                  , canGang = False --暗杠?
-                  , canPeng = False
-                  , canChi = False },
-                  --, gangTiles = Nothing
-                  --, pengTiles = Nothing
-                  --, chiTiles = Nothing
-                  --, message = "dealt tile to player" },
-              Cmd.none )
+            if model.justMelded then
+              (model, Cmd.none)
+            else
+              let
+                (newHand, newDeck)
+                  = Tile.deal (getHand model model.turn) model.deck 1
+                hu = Strategy.checkWin newHand model.playerMelds
+                updatedModel =
+                  updateHand model (Tile.sortHand newHand) model.turn
+              in
+                ( { updatedModel
+                    | deck = newDeck
+                    , canHu = hu
+                    , canGang = False --暗杠?
+                    , canPeng = False
+                    , canChi = False },
+                    --, gangTiles = Nothing
+                    --, pengTiles = Nothing
+                    --, chiTiles = Nothing
+                    --, message = "dealt tile to player" },
+                Cmd.none )
           else
             let
               (newHand, newDeck)
@@ -424,6 +429,10 @@ update msg model =
               { updatedModel
                 | deck = newDeck
                 , discard = Just (DiscardedTile toDiscard model.turn)
+                , canGang = False --暗杠?
+                , canPeng = False
+                , canChi = False
+                -- reset gangTiles?
                 --, message = "processed game for " ++ Debug.toString model.turn
                 , turn = modBy 4 (model.turn) }
               {-
@@ -445,10 +454,28 @@ update msg model =
                 (gangs, gangrest) = Strategy.countGang model.playerHand t
                 (pengCount, pengs, pengrest) =
                   Strategy.countPeng hand
-                pengsWithTile = Strategy.getMeldWith pengs t
+                getFirstWith melds tile =
+                  case melds of
+                    [] ->
+                      Nothing
+                    m::mRest ->
+                      if List.member tile m then
+                        Just m
+                      else getFirstWith mRest tile
+                -- pengsWithTile = Strategy.getMeldWith pengs t
+                pengsWithTile = getFirstWith pengs t
                 (seqCount, seqs, seqrest) =
-                  Strategy.countSequences hand
-                seqsWithTile = Strategy.getMeldWith seqs t
+                  case t.suit of
+                    Dots ->
+                      Strategy.countSequences (Tile.collect Dots hand)
+                    Bamboo ->
+                      Strategy.countSequences (Tile.collect Bamboo hand)
+                    Characters ->
+                      Strategy.countSequences (Tile.collect Characters hand)
+                    _ ->
+                      (0, [], [])
+                -- seqsWithTile = Strategy.getMeldWith seqs t
+                seqsWithTile = getFirstWith seqs t
                 gangT =
                   (
                     if gangs == [] then Nothing else Just (gangs, gangrest)
@@ -456,32 +483,31 @@ update msg model =
                 pengT =
                   (
                     case pengsWithTile of
-                      [] ->
+                      Nothing ->
                         Nothing
-                      penghd::pengtl ->
-                        Just ( pengsWithTile
-                             , Strategy.removeSublist pengsWithTile hand )
+                      Just l ->
+                        Just ( l
+                             , Strategy.removeSublist l hand )
                   )
                 chiT =
                   (
                     case seqsWithTile of
-                      [] ->
+                      Nothing ->
                         Nothing
-                      seqhd::seqtl ->
-                        Just ( seqsWithTile
-                             , Strategy.removeSublist seqsWithTile hand )
+                      Just l ->
+                        Just ( l
+                             , Strategy.removeSublist l hand )
                   )
               in
                 ( { model
                     | canHu = hu
                     , canGang = Strategy.checkForGang model.playerHand t
                     , canPeng = Strategy.checkForPeng model.playerHand t
-                    , canChi = Strategy.checkForChi model.playerHand t
-                               && discarder == 3
+                    , canChi = seqCount > 0 && discarder == 3
                     , gangTiles = gangT
                     , pengTiles = pengT
                     , chiTiles = chiT
-                    , message = Debug.toString pengs ++ " " ++ Debug.toString seqs },
+                    , message = "calculated tiles" },
                     --, message = "updated canGang etc." },
                 Cmd.none )
               -- ( { model | message = "HELLO" } , Cmd.none) --check if player can hu, gang, peng, chi, update canHu canGang, etc.
@@ -503,13 +529,19 @@ update msg model =
                 RunGame
                 { model
                 | turn = modBy 4 (model.turn + 1)
-                , discard = Nothing }
+                , discard = Nothing
+                , gangTiles = Nothing
+                , pengTiles = Nothing
+                , chiTiles = Nothing }
           else
             update
             RunGame
             { model
             | turn = modBy 4 (model.turn + 1)
-            , discard = Nothing }
+            , discard = Nothing
+            , gangTiles = Nothing
+            , pengTiles = Nothing
+            , chiTiles = Nothing }
         Just r ->
           case r.attempt of
             Hu tiles ->
@@ -525,7 +557,11 @@ update msg model =
                               , canPeng = False
                               , canChi = False
                               , request = Nothing
-                              , discard = Nothing }
+                              , discard = Nothing
+                              , gangTiles = Nothing
+                              , pengTiles = Nothing
+                              , chiTiles = Nothing
+                              , justMelded = r.requester == 0 }
                               rest
                               r.requester
               in
@@ -542,7 +578,11 @@ update msg model =
                               , canPeng = False
                               , canChi = False
                               , request = Nothing
-                              , discard = Nothing }
+                              , discard = Nothing
+                              , gangTiles = Nothing
+                              , pengTiles = Nothing
+                              , chiTiles = Nothing
+                              , justMelded = r.requester == 0 }
                               rest
                               r.requester
               in
@@ -559,7 +599,11 @@ update msg model =
                               , canPeng = False
                               , canChi = False
                               , request = Nothing
-                              , discard = Nothing }
+                              , discard = Nothing
+                              , gangTiles = Nothing
+                              , pengTiles = Nothing
+                              , chiTiles = Nothing
+                              , justMelded = r.requester == 0 }
                               rest
                               r.requester
               in
@@ -583,7 +627,8 @@ update msg model =
             | playerSelected = Nothing
             , discard = Just (DiscardedTile t 0)
             , playerHand = newHand
-            , turn = modBy 4 (model.turn) }
+            , turn = modBy 4 (model.turn)
+            , justMelded = False }
     PlayerHu ->
       ( { model | message = "you win!" },
       Cmd.none )
@@ -652,7 +697,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Time.every 1000 (Basics.always CheckRequests)
+  Time.every 2000 (Basics.always CheckRequests)
 
 main : Program () Model Msg
 main =
