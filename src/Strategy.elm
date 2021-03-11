@@ -53,17 +53,10 @@ getMeldWith melds tile =
   case melds of
     [] ->
       []
-    meld::rest ->
-      let
-        loop m original =
-          case m of
-            [] ->
-              []
-            t::ts ->
-              if t == tile then original
-              else loop ts original
-      in
-        loop meld meld
+    m::mRest ->
+      if List.member tile m then
+        m
+      else getMeldWith mRest tile
 
 -- returns (count, sequences, rest)
 countSequences : List Tile -> (Int, List (List Tile), List Tile)
@@ -136,7 +129,7 @@ countPeng tiles =
 -- tested
 countGang : List Tile -> Tile -> (List Tile, List Tile) -- (gangs, rest)
 countGang tiles newtile =
-  if (countTiles tiles newtile) == 4 then
+  if (countTiles tiles newtile) == 3 then
     ([newtile, newtile, newtile, newtile],
     -- should only have max 4 of same tile, so can use List.filter
     List.filter (\x -> x /= newtile) tiles)
@@ -373,5 +366,12 @@ testHand5 =
   , Tile Three Bamboo
   , Tile Three Bamboo
   , Tile Three Bamboo ]
+
+testHand6 : List Tile
+testHand6 =
+  [ Tile Seven Dots
+  , Tile Eight Dots
+  , Tile Nine Dots
+  , Tile One Dots ]
 
 thing = Tile Three Bamboo

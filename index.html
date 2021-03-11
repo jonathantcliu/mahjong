@@ -6151,7 +6151,7 @@ var $author$project$Strategy$checkWin = F2(
 	});
 var $author$project$Strategy$countGang = F2(
 	function (tiles, newtile) {
-		return (A2($author$project$Strategy$countTiles, tiles, newtile) === 4) ? _Utils_Tuple2(
+		return (A2($author$project$Strategy$countTiles, tiles, newtile) === 3) ? _Utils_Tuple2(
 			_List_fromArray(
 				[newtile, newtile, newtile, newtile]),
 			A2(
@@ -6445,8 +6445,8 @@ var $author$project$Strategy$findDiscard = function (tiles) {
 			return _Debug_todo(
 				'Strategy',
 				{
-					start: {line: 224, column: 13},
-					end: {line: 224, column: 23}
+					start: {line: 217, column: 13},
+					end: {line: 217, column: 23}
 				})('Exception: discard called on empty');
 		} else {
 			var ft = _v1.a;
@@ -7062,7 +7062,7 @@ var $author$project$Main$update = F2(
 						var _v5 = _Utils_Tuple2(dt.tile, dt.discarder);
 						var t = _v5.a;
 						var discarder = _v5.b;
-						if (!discarder) {
+						if ((!discarder) || model.canNewGame) {
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						} else {
 							var hand = A2($elm$core$List$cons, t, model.playerHand);
@@ -7144,7 +7144,7 @@ var $author$project$Main$update = F2(
 								_Utils_update(
 									model,
 									{
-										canChi: (seqCount > 0) && (discarder === 3),
+										canChi: (!_Utils_eq(seqsWithTile, $elm$core$Maybe$Nothing)) && (discarder === 3),
 										canGang: A2($author$project$Strategy$checkForGang, model.playerHand, t),
 										canHu: hu,
 										canPeng: A2($author$project$Strategy$checkForPeng, model.playerHand, t),
@@ -7164,19 +7164,23 @@ var $author$project$Main$update = F2(
 							if (_v14.$ === 'Nothing') {
 								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 							} else {
-								var $temp$msg = $author$project$Main$RunGame,
-									$temp$model = _Utils_update(
-									model,
-									{
-										chiTiles: $elm$core$Maybe$Nothing,
-										discard: $elm$core$Maybe$Nothing,
-										gangTiles: $elm$core$Maybe$Nothing,
-										pengTiles: $elm$core$Maybe$Nothing,
-										turn: A2($elm$core$Basics$modBy, 4, model.turn + 1)
-									});
-								msg = $temp$msg;
-								model = $temp$model;
-								continue update;
+								if (model.canNewGame) {
+									return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+								} else {
+									var $temp$msg = $author$project$Main$RunGame,
+										$temp$model = _Utils_update(
+										model,
+										{
+											chiTiles: $elm$core$Maybe$Nothing,
+											discard: $elm$core$Maybe$Nothing,
+											gangTiles: $elm$core$Maybe$Nothing,
+											pengTiles: $elm$core$Maybe$Nothing,
+											turn: A2($elm$core$Basics$modBy, 4, model.turn + 1)
+										});
+									msg = $temp$msg;
+									model = $temp$model;
+									continue update;
+								}
 							}
 						} else {
 							var $temp$msg = $author$project$Main$RunGame,
@@ -7278,7 +7282,7 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{canHu: false, canNewGame: true, message: 'you win!'}),
+							{canHu: false, canNewGame: true, message: 'you win!', turn: 0}),
 						$elm$core$Platform$Cmd$none);
 				case 'PlayerGang':
 					var _v20 = model.gangTiles;

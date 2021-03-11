@@ -445,7 +445,7 @@ update msg model =
           let
             (t, discarder) = (dt.tile, dt.discarder)
           in
-            if discarder == 0 then
+            if discarder == 0 || model.canNewGame then
               (model, Cmd.none)
             else
               let
@@ -503,7 +503,7 @@ update msg model =
                     | canHu = hu
                     , canGang = Strategy.checkForGang model.playerHand t
                     , canPeng = Strategy.checkForPeng model.playerHand t
-                    , canChi = seqCount > 0 && discarder == 3
+                    , canChi = seqsWithTile /= Nothing && discarder == 3
                     , gangTiles = gangT
                     , pengTiles = pengT
                     , chiTiles = chiT
@@ -525,14 +525,17 @@ update msg model =
               Nothing ->
                 (model, Cmd.none)
               _ -> -- player discarded something
-                update
-                RunGame
-                { model
-                | turn = modBy 4 (model.turn + 1)
-                , discard = Nothing
-                , gangTiles = Nothing
-                , pengTiles = Nothing
-                , chiTiles = Nothing }
+                if model.canNewGame then
+                  (model, Cmd.none)
+                else
+                  update
+                  RunGame
+                  { model
+                  | turn = modBy 4 (model.turn + 1)
+                  , discard = Nothing
+                  , gangTiles = Nothing
+                  , pengTiles = Nothing
+                  , chiTiles = Nothing }
           else
             update
             RunGame
@@ -561,7 +564,7 @@ update msg model =
                               , gangTiles = Nothing
                               , pengTiles = Nothing
                               , chiTiles = Nothing
-                              , justMelded = False } -- need to draw! 
+                              , justMelded = False } -- need to draw!
                               --, justMelded = r.requester == 0 }
                               rest
                               r.requester
@@ -634,6 +637,7 @@ update msg model =
       ( { model
         | message = "you win!"
         , canNewGame = True
+        , turn = 0
         , canHu = False },
       Cmd.none )
     PlayerGang ->
