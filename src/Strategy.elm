@@ -133,9 +133,10 @@ countPeng tiles =
   in
     loop tiles 0 [] []
 
+-- tested
 countGang : List Tile -> Tile -> (List Tile, List Tile) -- (gangs, rest)
 countGang tiles newtile =
-  if (countTiles tiles newtile) == 3 then
+  if (countTiles tiles newtile) == 4 then
     ([newtile, newtile, newtile, newtile],
     -- should only have max 4 of same tile, so can use List.filter
     List.filter (\x -> x /= newtile) tiles)
@@ -365,3 +366,12 @@ testHand4 =
   , Tile White Dragons
   , Tile White Dragons
   ]
+
+testHand5 : List Tile
+testHand5 =
+  [ Tile Three Bamboo
+  , Tile Three Bamboo
+  , Tile Three Bamboo
+  , Tile Three Bamboo ]
+
+thing = Tile Three Bamboo
