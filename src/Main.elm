@@ -378,7 +378,7 @@ update msg model =
   case msg of
     NewGame n ->
       let
-        assigned = assign model n
+        assigned = assign (Tuple.first (init ())) n
       in
         ( { assigned | canNewGame = False }, shuffleDeck )
     ShuffleDeck tiles ->
@@ -636,10 +636,29 @@ update msg model =
             , justMelded = False }
     PlayerHu ->
       ( { model
-        | message = "you win!"
+        | message =
+          (case model.discard of
+            Nothing ->
+              "you self-touch win, you god!"
+            Just dt ->
+              "you win off of CPU " ++
+              Debug.toString dt.discarder ++
+              "'s discard!"
+          )
         , canNewGame = True
+        , playerHand =
+          (
+            case model.discard of
+              Nothing ->
+                model.playerHand
+              Just dt ->
+                dt.tile::model.playerHand
+          )
         , turn = 0
-        , canHu = False },
+        , canHu = False
+        , canGang = False
+        , canPeng = False
+        , canChi = False },
       Cmd.none )
     PlayerGang ->
       case model.gangTiles of

@@ -6981,7 +6981,10 @@ var $author$project$Main$update = F2(
 			switch (msg.$) {
 				case 'NewGame':
 					var n = msg.a;
-					var assigned = A2($author$project$Main$assign, model, n);
+					var assigned = A2(
+						$author$project$Main$assign,
+						$author$project$Main$init(_Utils_Tuple0).a,
+						n);
 					return _Utils_Tuple2(
 						_Utils_update(
 							assigned,
@@ -7286,11 +7289,36 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{canHu: false, canNewGame: true, message: 'you win!', turn: 0}),
+							{
+								canChi: false,
+								canGang: false,
+								canHu: false,
+								canNewGame: true,
+								canPeng: false,
+								message: function () {
+									var _v20 = model.discard;
+									if (_v20.$ === 'Nothing') {
+										return 'you self-touch win, you god!';
+									} else {
+										var dt = _v20.a;
+										return 'you win off of CPU ' + ($elm$core$Debug$toString(dt.discarder) + '\'s discard!');
+									}
+								}(),
+								playerHand: function () {
+									var _v21 = model.discard;
+									if (_v21.$ === 'Nothing') {
+										return model.playerHand;
+									} else {
+										var dt = _v21.a;
+										return A2($elm$core$List$cons, dt.tile, model.playerHand);
+									}
+								}(),
+								turn: 0
+							}),
 						$elm$core$Platform$Cmd$none);
 				case 'PlayerGang':
-					var _v20 = model.gangTiles;
-					if (_v20.$ === 'Nothing') {
+					var _v22 = model.gangTiles;
+					if (_v22.$ === 'Nothing') {
 						var $temp$msg = $author$project$Main$CheckRequests,
 							$temp$model = _Utils_update(
 							model,
@@ -7299,9 +7327,9 @@ var $author$project$Main$update = F2(
 						model = $temp$model;
 						continue update;
 					} else {
-						var _v21 = _v20.a;
-						var g = _v21.a;
-						var r = _v21.b;
+						var _v23 = _v22.a;
+						var g = _v23.a;
+						var r = _v23.b;
 						var $temp$msg = $author$project$Main$CheckRequests,
 							$temp$model = _Utils_update(
 							model,
@@ -7318,8 +7346,8 @@ var $author$project$Main$update = F2(
 						continue update;
 					}
 				case 'PlayerPeng':
-					var _v22 = model.pengTiles;
-					if (_v22.$ === 'Nothing') {
+					var _v24 = model.pengTiles;
+					if (_v24.$ === 'Nothing') {
 						var $temp$msg = $author$project$Main$CheckRequests,
 							$temp$model = _Utils_update(
 							model,
@@ -7328,11 +7356,11 @@ var $author$project$Main$update = F2(
 						model = $temp$model;
 						continue update;
 					} else {
-						var _v23 = _v22.a;
-						var p = _v23.a;
-						var r = _v23.b;
-						var _v24 = model.request;
-						if (_v24.$ === 'Nothing') {
+						var _v25 = _v24.a;
+						var p = _v25.a;
+						var r = _v25.b;
+						var _v26 = model.request;
+						if (_v26.$ === 'Nothing') {
 							var $temp$msg = $author$project$Main$CheckRequests,
 								$temp$model = _Utils_update(
 								model,
@@ -7348,9 +7376,9 @@ var $author$project$Main$update = F2(
 							model = $temp$model;
 							continue update;
 						} else {
-							var req = _v24.a;
-							var _v25 = req.attempt;
-							if (_v25.$ === 'Gang') {
+							var req = _v26.a;
+							var _v27 = req.attempt;
+							if (_v27.$ === 'Gang') {
 								var $temp$msg = $author$project$Main$CheckRequests,
 									$temp$model = model;
 								msg = $temp$msg;
@@ -7375,8 +7403,8 @@ var $author$project$Main$update = F2(
 						}
 					}
 				default:
-					var _v26 = model.chiTiles;
-					if (_v26.$ === 'Nothing') {
+					var _v28 = model.chiTiles;
+					if (_v28.$ === 'Nothing') {
 						var $temp$msg = $author$project$Main$CheckRequests,
 							$temp$model = _Utils_update(
 							model,
@@ -7385,11 +7413,11 @@ var $author$project$Main$update = F2(
 						model = $temp$model;
 						continue update;
 					} else {
-						var _v27 = _v26.a;
-						var c = _v27.a;
-						var r = _v27.b;
-						var _v28 = model.request;
-						if (_v28.$ === 'Nothing') {
+						var _v29 = _v28.a;
+						var c = _v29.a;
+						var r = _v29.b;
+						var _v30 = model.request;
+						if (_v30.$ === 'Nothing') {
 							var $temp$msg = $author$project$Main$CheckRequests,
 								$temp$model = _Utils_update(
 								model,
