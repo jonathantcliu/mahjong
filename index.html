@@ -6151,7 +6151,7 @@ var $author$project$Strategy$checkWin = F2(
 	});
 var $author$project$Strategy$countGang = F2(
 	function (tiles, newtile) {
-		return (A2($author$project$Strategy$countTiles, tiles, newtile) === 3) ? _Utils_Tuple2(
+		return (A2($author$project$Strategy$countTiles, tiles, newtile) === 4) ? _Utils_Tuple2(
 			_List_fromArray(
 				[newtile, newtile, newtile, newtile]),
 			A2(
@@ -6445,8 +6445,8 @@ var $author$project$Strategy$findDiscard = function (tiles) {
 			return _Debug_todo(
 				'Strategy',
 				{
-					start: {line: 223, column: 13},
-					end: {line: 223, column: 23}
+					start: {line: 224, column: 13},
+					end: {line: 224, column: 23}
 				})('Exception: discard called on empty');
 		} else {
 			var ft = _v1.a;
@@ -7215,7 +7215,7 @@ var $author$project$Main$update = F2(
 									$author$project$Main$updateHand,
 									_Utils_update(
 										newModel,
-										{canChi: false, canGang: false, canPeng: false, chiTiles: $elm$core$Maybe$Nothing, discard: $elm$core$Maybe$Nothing, gangTiles: $elm$core$Maybe$Nothing, justMelded: !r.requester, pengTiles: $elm$core$Maybe$Nothing, request: $elm$core$Maybe$Nothing, turn: r.requester}),
+										{canChi: false, canGang: false, canPeng: false, chiTiles: $elm$core$Maybe$Nothing, discard: $elm$core$Maybe$Nothing, gangTiles: $elm$core$Maybe$Nothing, justMelded: false, pengTiles: $elm$core$Maybe$Nothing, request: $elm$core$Maybe$Nothing, turn: r.requester}),
 									rest,
 									r.requester);
 								return _Utils_Tuple2(withNewTurn, $elm$core$Platform$Cmd$none);
