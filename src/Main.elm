@@ -630,7 +630,10 @@ update msg model =
             , turn = modBy 4 (model.turn)
             , justMelded = False }
     PlayerHu ->
-      ( { model | message = "you win!" },
+      ( { model
+        | message = "you win!"
+        , canNewGame = True
+        , canHu = False },
       Cmd.none )
     PlayerGang ->
       case model.gangTiles of
