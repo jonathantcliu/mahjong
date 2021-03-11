@@ -393,130 +393,141 @@ update msg model =
           , cpu2Hand = Tile.sortHand hands.cpu2Hand
           , cpu3Hand = Tile.sortHand hands.cpu3Hand }
     RunGame ->
-      case model.discard of
-        Nothing ->
-          if model.turn == 0 then
-            if model.justMelded then
-              (model, Cmd.none)
+      if model.deck == [] then
+        ( { model
+          | message = "draw!"
+          , canNewGame = True
+          , turn = 0
+          , canHu = False
+          , canGang = False
+          , canPeng = False
+          , canChi = False },
+        Cmd.none )
+      else
+        case model.discard of
+          Nothing ->
+            if model.turn == 0 then
+              if model.justMelded then
+                (model, Cmd.none)
+              else
+                let
+                  (newHand, newDeck)
+                    = Tile.deal (getHand model model.turn) model.deck 1
+                  hu = Strategy.checkWin newHand model.playerMelds
+                  updatedModel =
+                    updateHand model (Tile.sortHand newHand) model.turn
+                in
+                  ( { updatedModel
+                      | deck = newDeck
+                      , canHu = hu
+                      , canGang = False --暗杠?
+                      , canPeng = False
+                      , canChi = False },
+                      --, gangTiles = Nothing
+                      --, pengTiles = Nothing
+                      --, chiTiles = Nothing
+                      --, message = "dealt tile to player" },
+                  Cmd.none )
             else
               let
                 (newHand, newDeck)
                   = Tile.deal (getHand model model.turn) model.deck 1
-                hu = Strategy.checkWin newHand model.playerMelds
-                updatedModel =
-                  updateHand model (Tile.sortHand newHand) model.turn
+                (toDiscard, leftover) = Strategy.findDiscard newHand
+                updatedModel = updateHand model leftover model.turn
               in
+                update
+                RunGame
+                { updatedModel
+                  | deck = newDeck
+                  , discard = Just (DiscardedTile toDiscard model.turn)
+                  , canGang = False --暗杠?
+                  , canPeng = False
+                  , canChi = False
+                  -- reset gangTiles?
+                  --, message = "processed game for " ++ Debug.toString model.turn
+                  , turn = modBy 4 (model.turn) }
+                {-
                 ( { updatedModel
-                    | deck = newDeck
-                    , canHu = hu
-                    , canGang = False --暗杠?
-                    , canPeng = False
-                    , canChi = False },
-                    --, gangTiles = Nothing
-                    --, pengTiles = Nothing
-                    --, chiTiles = Nothing
-                    --, message = "dealt tile to player" },
-                Cmd.none )
-          else
+                  | deck = newDeck
+                  , discard = Just (DiscardedTile toDiscard model.turn)
+                  , message = "processed game for " ++ Debug.toString model.turn
+                  , turn = modBy 4 (model.turn) }, Cmd.none) -}
+          Just dt ->
             let
-              (newHand, newDeck)
-                = Tile.deal (getHand model model.turn) model.deck 1
-              (toDiscard, leftover) = Strategy.findDiscard newHand
-              updatedModel = updateHand model leftover model.turn
+              (t, discarder) = (dt.tile, dt.discarder)
             in
-              update
-              RunGame
-              { updatedModel
-                | deck = newDeck
-                , discard = Just (DiscardedTile toDiscard model.turn)
-                , canGang = False --暗杠?
-                , canPeng = False
-                , canChi = False
-                -- reset gangTiles?
-                --, message = "processed game for " ++ Debug.toString model.turn
-                , turn = modBy 4 (model.turn) }
-              {-
-              ( { updatedModel
-                | deck = newDeck
-                , discard = Just (DiscardedTile toDiscard model.turn)
-                , message = "processed game for " ++ Debug.toString model.turn
-                , turn = modBy 4 (model.turn) }, Cmd.none) -}
-        Just dt ->
-          let
-            (t, discarder) = (dt.tile, dt.discarder)
-          in
-            if discarder == 0 || model.canNewGame then
-              (model, Cmd.none)
-            else
-              let
-                hand = t::model.playerHand
-                hu = Strategy.checkWin hand model.playerMelds
-                (gangs, gangrest) = Strategy.countGang model.playerHand t
-                (pengCount, pengs, pengrest) =
-                  Strategy.countPeng hand
-                getFirstWith melds tile =
-                  case melds of
-                    [] ->
-                      Nothing
-                    m::mRest ->
-                      if List.member tile m then
-                        Just m
-                      else getFirstWith mRest tile
-                -- pengsWithTile = Strategy.getMeldWith pengs t
-                pengsWithTile = getFirstWith pengs t
-                (seqCount, seqs, seqrest) =
-                  case t.suit of
-                    Dots ->
-                      Strategy.countSequences (Tile.collect Dots hand)
-                    Bamboo ->
-                      Strategy.countSequences (Tile.collect Bamboo hand)
-                    Characters ->
-                      Strategy.countSequences (Tile.collect Characters hand)
-                    _ ->
-                      (0, [], [])
-                -- seqsWithTile = Strategy.getMeldWith seqs t
-                seqsWithTile = getFirstWith seqs t
-                gangT =
-                  (
-                    if gangs == [] then Nothing else Just (gangs, gangrest)
-                  )
-                pengT =
-                  (
-                    case pengsWithTile of
-                      Nothing ->
+              if discarder == 0 || model.canNewGame then
+                (model, Cmd.none)
+              else
+                let
+                  hand = t::model.playerHand
+                  hu = Strategy.checkWin hand model.playerMelds
+                  (gangs, gangrest) = Strategy.countGang model.playerHand t
+                  (pengCount, pengs, pengrest) =
+                    Strategy.countPeng hand
+                  getFirstWith melds tile =
+                    case melds of
+                      [] ->
                         Nothing
-                      Just l ->
-                        Just ( l
-                             , Strategy.removeSublist l hand )
-                  )
-                chiT =
-                  (
-                    case seqsWithTile of
-                      Nothing ->
-                        Nothing
-                      Just l ->
-                        Just ( l
-                             , Strategy.removeSublist l hand )
-                  )
-              in
-                ( { model
-                    | canHu = hu
-                    , canGang = Strategy.checkForGang model.playerHand t
-                    , canPeng = Strategy.checkForPeng model.playerHand t
-                    , canChi = seqsWithTile /= Nothing && discarder == 3
-                    , gangTiles = gangT
-                    , pengTiles = pengT
-                    , chiTiles = chiT
-                    , message = "calculated tiles" },
-                    --, message = "updated canGang etc." },
-                Cmd.none )
-              -- ( { model | message = "HELLO" } , Cmd.none) --check if player can hu, gang, peng, chi, update canHu canGang, etc.
-              -- need to update attemptTiles with the tiles for Gang, Peng, etc.
-              -- 2021/03/07, preliminary done 2021/03/07
-            -- here lies spaghetti
-            -- else
-              -- getMove model 1 t discarder
-              -- (model, Cmd.none)
+                      m::mRest ->
+                        if List.member tile m then
+                          Just m
+                        else getFirstWith mRest tile
+                  -- pengsWithTile = Strategy.getMeldWith pengs t
+                  pengsWithTile = getFirstWith pengs t
+                  (seqCount, seqs, seqrest) =
+                    case t.suit of
+                      Dots ->
+                        Strategy.countSequences (Tile.collect Dots hand)
+                      Bamboo ->
+                        Strategy.countSequences (Tile.collect Bamboo hand)
+                      Characters ->
+                        Strategy.countSequences (Tile.collect Characters hand)
+                      _ ->
+                        (0, [], [])
+                  -- seqsWithTile = Strategy.getMeldWith seqs t
+                  seqsWithTile = getFirstWith seqs t
+                  gangT =
+                    (
+                      if gangs == [] then Nothing else Just (gangs, gangrest)
+                    )
+                  pengT =
+                    (
+                      case pengsWithTile of
+                        Nothing ->
+                          Nothing
+                        Just l ->
+                          Just ( l
+                               , Strategy.removeSublist l hand )
+                    )
+                  chiT =
+                    (
+                      case seqsWithTile of
+                        Nothing ->
+                          Nothing
+                        Just l ->
+                          Just ( l
+                               , Strategy.removeSublist l hand )
+                    )
+                in
+                  ( { model
+                      | canHu = hu
+                      , canGang = Strategy.checkForGang model.playerHand t
+                      , canPeng = Strategy.checkForPeng model.playerHand t
+                      , canChi = seqsWithTile /= Nothing && discarder == 3
+                      , gangTiles = gangT
+                      , pengTiles = pengT
+                      , chiTiles = chiT
+                      , message = "calculated tiles" },
+                      --, message = "updated canGang etc." },
+                  Cmd.none )
+                -- ( { model | message = "HELLO" } , Cmd.none) --check if player can hu, gang, peng, chi, update canHu canGang, etc.
+                -- need to update attemptTiles with the tiles for Gang, Peng, etc.
+                -- 2021/03/07, preliminary done 2021/03/07
+              -- here lies spaghetti
+              -- else
+                -- getMove model 1 t discarder
+                -- (model, Cmd.none)
     CheckRequests ->
       case model.request of
         Nothing ->

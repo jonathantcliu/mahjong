@@ -7007,156 +7007,164 @@ var $author$project$Main$update = F2(
 					model = $temp$model;
 					continue update;
 				case 'RunGame':
-					var _v1 = model.discard;
-					if (_v1.$ === 'Nothing') {
-						if (!model.turn) {
-							if (model.justMelded) {
-								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					if (_Utils_eq(model.deck, _List_Nil)) {
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{canChi: false, canGang: false, canHu: false, canNewGame: true, canPeng: false, message: 'draw!', turn: 0}),
+							$elm$core$Platform$Cmd$none);
+					} else {
+						var _v1 = model.discard;
+						if (_v1.$ === 'Nothing') {
+							if (!model.turn) {
+								if (model.justMelded) {
+									return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+								} else {
+									var _v2 = A3(
+										$author$project$Tile$deal,
+										A2($author$project$Main$getHand, model, model.turn),
+										model.deck,
+										1);
+									var newHand = _v2.a;
+									var newDeck = _v2.b;
+									var hu = A2($author$project$Strategy$checkWin, newHand, model.playerMelds);
+									var updatedModel = A3(
+										$author$project$Main$updateHand,
+										model,
+										$author$project$Tile$sortHand(newHand),
+										model.turn);
+									return _Utils_Tuple2(
+										_Utils_update(
+											updatedModel,
+											{canChi: false, canGang: false, canHu: hu, canPeng: false, deck: newDeck}),
+										$elm$core$Platform$Cmd$none);
+								}
 							} else {
-								var _v2 = A3(
+								var _v3 = A3(
 									$author$project$Tile$deal,
 									A2($author$project$Main$getHand, model, model.turn),
 									model.deck,
 									1);
-								var newHand = _v2.a;
-								var newDeck = _v2.b;
-								var hu = A2($author$project$Strategy$checkWin, newHand, model.playerMelds);
-								var updatedModel = A3(
-									$author$project$Main$updateHand,
-									model,
-									$author$project$Tile$sortHand(newHand),
-									model.turn);
-								return _Utils_Tuple2(
-									_Utils_update(
-										updatedModel,
-										{canChi: false, canGang: false, canHu: hu, canPeng: false, deck: newDeck}),
-									$elm$core$Platform$Cmd$none);
+								var newHand = _v3.a;
+								var newDeck = _v3.b;
+								var _v4 = $author$project$Strategy$findDiscard(newHand);
+								var toDiscard = _v4.a;
+								var leftover = _v4.b;
+								var updatedModel = A3($author$project$Main$updateHand, model, leftover, model.turn);
+								var $temp$msg = $author$project$Main$RunGame,
+									$temp$model = _Utils_update(
+									updatedModel,
+									{
+										canChi: false,
+										canGang: false,
+										canPeng: false,
+										deck: newDeck,
+										discard: $elm$core$Maybe$Just(
+											A2($author$project$Main$DiscardedTile, toDiscard, model.turn)),
+										turn: A2($elm$core$Basics$modBy, 4, model.turn)
+									});
+								msg = $temp$msg;
+								model = $temp$model;
+								continue update;
 							}
 						} else {
-							var _v3 = A3(
-								$author$project$Tile$deal,
-								A2($author$project$Main$getHand, model, model.turn),
-								model.deck,
-								1);
-							var newHand = _v3.a;
-							var newDeck = _v3.b;
-							var _v4 = $author$project$Strategy$findDiscard(newHand);
-							var toDiscard = _v4.a;
-							var leftover = _v4.b;
-							var updatedModel = A3($author$project$Main$updateHand, model, leftover, model.turn);
-							var $temp$msg = $author$project$Main$RunGame,
-								$temp$model = _Utils_update(
-								updatedModel,
-								{
-									canChi: false,
-									canGang: false,
-									canPeng: false,
-									deck: newDeck,
-									discard: $elm$core$Maybe$Just(
-										A2($author$project$Main$DiscardedTile, toDiscard, model.turn)),
-									turn: A2($elm$core$Basics$modBy, 4, model.turn)
-								});
-							msg = $temp$msg;
-							model = $temp$model;
-							continue update;
-						}
-					} else {
-						var dt = _v1.a;
-						var _v5 = _Utils_Tuple2(dt.tile, dt.discarder);
-						var t = _v5.a;
-						var discarder = _v5.b;
-						if ((!discarder) || model.canNewGame) {
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-						} else {
-							var hand = A2($elm$core$List$cons, t, model.playerHand);
-							var hu = A2($author$project$Strategy$checkWin, hand, model.playerMelds);
-							var getFirstWith = F2(
-								function (melds, tile) {
-									getFirstWith:
-									while (true) {
-										if (!melds.b) {
-											return $elm$core$Maybe$Nothing;
-										} else {
-											var m = melds.a;
-											var mRest = melds.b;
-											if (A2($elm$core$List$member, tile, m)) {
-												return $elm$core$Maybe$Just(m);
+							var dt = _v1.a;
+							var _v5 = _Utils_Tuple2(dt.tile, dt.discarder);
+							var t = _v5.a;
+							var discarder = _v5.b;
+							if ((!discarder) || model.canNewGame) {
+								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+							} else {
+								var hand = A2($elm$core$List$cons, t, model.playerHand);
+								var hu = A2($author$project$Strategy$checkWin, hand, model.playerMelds);
+								var getFirstWith = F2(
+									function (melds, tile) {
+										getFirstWith:
+										while (true) {
+											if (!melds.b) {
+												return $elm$core$Maybe$Nothing;
 											} else {
-												var $temp$melds = mRest,
-													$temp$tile = tile;
-												melds = $temp$melds;
-												tile = $temp$tile;
-												continue getFirstWith;
+												var m = melds.a;
+												var mRest = melds.b;
+												if (A2($elm$core$List$member, tile, m)) {
+													return $elm$core$Maybe$Just(m);
+												} else {
+													var $temp$melds = mRest,
+														$temp$tile = tile;
+													melds = $temp$melds;
+													tile = $temp$tile;
+													continue getFirstWith;
+												}
 											}
 										}
+									});
+								var _v7 = function () {
+									var _v8 = t.suit;
+									switch (_v8.$) {
+										case 'Dots':
+											return $author$project$Strategy$countSequences(
+												A2($author$project$Tile$collect, $author$project$Tile$Dots, hand));
+										case 'Bamboo':
+											return $author$project$Strategy$countSequences(
+												A2($author$project$Tile$collect, $author$project$Tile$Bamboo, hand));
+										case 'Characters':
+											return $author$project$Strategy$countSequences(
+												A2($author$project$Tile$collect, $author$project$Tile$Characters, hand));
+										default:
+											return _Utils_Tuple3(0, _List_Nil, _List_Nil);
 									}
-								});
-							var _v7 = function () {
-								var _v8 = t.suit;
-								switch (_v8.$) {
-									case 'Dots':
-										return $author$project$Strategy$countSequences(
-											A2($author$project$Tile$collect, $author$project$Tile$Dots, hand));
-									case 'Bamboo':
-										return $author$project$Strategy$countSequences(
-											A2($author$project$Tile$collect, $author$project$Tile$Bamboo, hand));
-									case 'Characters':
-										return $author$project$Strategy$countSequences(
-											A2($author$project$Tile$collect, $author$project$Tile$Characters, hand));
-									default:
-										return _Utils_Tuple3(0, _List_Nil, _List_Nil);
-								}
-							}();
-							var seqCount = _v7.a;
-							var seqs = _v7.b;
-							var seqrest = _v7.c;
-							var seqsWithTile = A2(getFirstWith, seqs, t);
-							var chiT = function () {
-								if (seqsWithTile.$ === 'Nothing') {
-									return $elm$core$Maybe$Nothing;
-								} else {
-									var l = seqsWithTile.a;
-									return $elm$core$Maybe$Just(
-										_Utils_Tuple2(
-											l,
-											A2($author$project$Strategy$removeSublist, l, hand)));
-								}
-							}();
-							var _v9 = $author$project$Strategy$countPeng(hand);
-							var pengCount = _v9.a;
-							var pengs = _v9.b;
-							var pengrest = _v9.c;
-							var pengsWithTile = A2(getFirstWith, pengs, t);
-							var pengT = function () {
-								if (pengsWithTile.$ === 'Nothing') {
-									return $elm$core$Maybe$Nothing;
-								} else {
-									var l = pengsWithTile.a;
-									return $elm$core$Maybe$Just(
-										_Utils_Tuple2(
-											l,
-											A2($author$project$Strategy$removeSublist, l, hand)));
-								}
-							}();
-							var _v10 = A2($author$project$Strategy$countGang, model.playerHand, t);
-							var gangs = _v10.a;
-							var gangrest = _v10.b;
-							var gangT = _Utils_eq(gangs, _List_Nil) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
-								_Utils_Tuple2(gangs, gangrest));
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										canChi: (!_Utils_eq(seqsWithTile, $elm$core$Maybe$Nothing)) && (discarder === 3),
-										canGang: A2($author$project$Strategy$checkForGang, model.playerHand, t),
-										canHu: hu,
-										canPeng: A2($author$project$Strategy$checkForPeng, model.playerHand, t),
-										chiTiles: chiT,
-										gangTiles: gangT,
-										message: 'calculated tiles',
-										pengTiles: pengT
-									}),
-								$elm$core$Platform$Cmd$none);
+								}();
+								var seqCount = _v7.a;
+								var seqs = _v7.b;
+								var seqrest = _v7.c;
+								var seqsWithTile = A2(getFirstWith, seqs, t);
+								var chiT = function () {
+									if (seqsWithTile.$ === 'Nothing') {
+										return $elm$core$Maybe$Nothing;
+									} else {
+										var l = seqsWithTile.a;
+										return $elm$core$Maybe$Just(
+											_Utils_Tuple2(
+												l,
+												A2($author$project$Strategy$removeSublist, l, hand)));
+									}
+								}();
+								var _v9 = $author$project$Strategy$countPeng(hand);
+								var pengCount = _v9.a;
+								var pengs = _v9.b;
+								var pengrest = _v9.c;
+								var pengsWithTile = A2(getFirstWith, pengs, t);
+								var pengT = function () {
+									if (pengsWithTile.$ === 'Nothing') {
+										return $elm$core$Maybe$Nothing;
+									} else {
+										var l = pengsWithTile.a;
+										return $elm$core$Maybe$Just(
+											_Utils_Tuple2(
+												l,
+												A2($author$project$Strategy$removeSublist, l, hand)));
+									}
+								}();
+								var _v10 = A2($author$project$Strategy$countGang, model.playerHand, t);
+								var gangs = _v10.a;
+								var gangrest = _v10.b;
+								var gangT = _Utils_eq(gangs, _List_Nil) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
+									_Utils_Tuple2(gangs, gangrest));
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											canChi: (!_Utils_eq(seqsWithTile, $elm$core$Maybe$Nothing)) && (discarder === 3),
+											canGang: A2($author$project$Strategy$checkForGang, model.playerHand, t),
+											canHu: hu,
+											canPeng: A2($author$project$Strategy$checkForPeng, model.playerHand, t),
+											chiTiles: chiT,
+											gangTiles: gangT,
+											message: 'calculated tiles',
+											pengTiles: pengT
+										}),
+									$elm$core$Platform$Cmd$none);
+							}
 						}
 					}
 				case 'CheckRequests':
