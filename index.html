@@ -7222,7 +7222,11 @@ var $author$project$Main$update = F2(
 										{canChi: false, canGang: false, canPeng: false, chiTiles: $elm$core$Maybe$Nothing, discard: $elm$core$Maybe$Nothing, gangTiles: $elm$core$Maybe$Nothing, justMelded: false, pengTiles: $elm$core$Maybe$Nothing, request: $elm$core$Maybe$Nothing, turn: r.requester}),
 									rest,
 									r.requester);
-								return _Utils_Tuple2(withNewTurn, $elm$core$Platform$Cmd$none);
+								var $temp$msg = $author$project$Main$RunGame,
+									$temp$model = withNewTurn;
+								msg = $temp$msg;
+								model = $temp$model;
+								continue update;
 							case 'Peng':
 								var _v17 = _v15.a;
 								var peng = _v17.a;

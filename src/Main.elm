@@ -568,10 +568,11 @@ update msg model =
                               --, justMelded = r.requester == 0 }
                               rest
                               r.requester
-              in
-                -- update
-                -- RunGame
-                (withNewTurn, Cmd.none)
+              in -- runGame with Gang?
+                update
+                RunGame
+                withNewTurn
+                -- (withNewTurn, Cmd.none)
             Peng (peng, rest) ->
               let
                 newModel = addShown model peng r.requester
