@@ -561,7 +561,8 @@ update msg model =
                               , gangTiles = Nothing
                               , pengTiles = Nothing
                               , chiTiles = Nothing
-                              , justMelded = r.requester == 0 }
+                              , justMelded = False -- need to draw!
+                              --, justMelded = r.requester == 0 }
                               rest
                               r.requester
               in
