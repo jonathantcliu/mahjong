@@ -7179,29 +7179,8 @@ var $author$project$Main$update = F2(
 				case 'CheckRequests':
 					var _v12 = model.request;
 					if (_v12.$ === 'Nothing') {
-						if (!model.turn) {
-							var _v13 = model.discard;
-							if (_v13.$ === 'Nothing') {
-								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-							} else {
-								if (model.canNewGame) {
-									return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-								} else {
-									var $temp$msg = $author$project$Main$RunGame,
-										$temp$model = _Utils_update(
-										model,
-										{
-											chiTiles: $elm$core$Maybe$Nothing,
-											discard: $elm$core$Maybe$Nothing,
-											gangTiles: $elm$core$Maybe$Nothing,
-											pengTiles: $elm$core$Maybe$Nothing,
-											turn: A2($elm$core$Basics$modBy, 4, model.turn + 1)
-										});
-									msg = $temp$msg;
-									model = $temp$model;
-									continue update;
-								}
-							}
+						if (model.canNewGame || ((!model.turn) && _Utils_eq(model.discard, $elm$core$Maybe$Nothing))) {
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						} else {
 							var $temp$msg = $author$project$Main$RunGame,
 								$temp$model = _Utils_update(
@@ -7219,10 +7198,18 @@ var $author$project$Main$update = F2(
 						}
 					} else {
 						var r = _v12.a;
-						var _v14 = r.attempt;
-						switch (_v14.$) {
+						var updatedModel = function (m) {
+							return _Utils_update(
+								m,
+								{canChi: false, canGang: false, canPeng: false, chiTiles: $elm$core$Maybe$Nothing, discard: $elm$core$Maybe$Nothing, gangTiles: $elm$core$Maybe$Nothing, pengTiles: $elm$core$Maybe$Nothing, request: $elm$core$Maybe$Nothing, turn: r.requester});
+						};
+						var shownModel = function (meld) {
+							return A3($author$project$Main$addShown, model, meld, r.requester);
+						};
+						var _v13 = r.attempt;
+						switch (_v13.$) {
 							case 'Hu':
-								var tiles = _v14.a;
+								var tiles = _v13.a;
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
@@ -7231,48 +7218,52 @@ var $author$project$Main$update = F2(
 										}),
 									$elm$core$Platform$Cmd$none);
 							case 'Gang':
-								var _v15 = _v14.a;
-								var gang = _v15.a;
-								var rest = _v15.b;
-								var newModel = A3($author$project$Main$addShown, model, gang, r.requester);
-								var withNewTurn = A3(
-									$author$project$Main$updateHand,
-									_Utils_update(
-										newModel,
-										{canChi: false, canGang: false, canPeng: false, chiTiles: $elm$core$Maybe$Nothing, discard: $elm$core$Maybe$Nothing, gangTiles: $elm$core$Maybe$Nothing, justMelded: false, pengTiles: $elm$core$Maybe$Nothing, request: $elm$core$Maybe$Nothing, turn: r.requester}),
-									rest,
-									r.requester);
+								var _v14 = _v13.a;
+								var gang = _v14.a;
+								var rest = _v14.b;
+								var newModel = updatedModel(
+									A3(
+										$author$project$Main$updateHand,
+										shownModel(gang),
+										rest,
+										r.requester));
 								var $temp$msg = $author$project$Main$RunGame,
-									$temp$model = withNewTurn;
+									$temp$model = _Utils_update(
+									newModel,
+									{justMelded: false});
 								msg = $temp$msg;
 								model = $temp$model;
 								continue update;
 							case 'Peng':
-								var _v16 = _v14.a;
-								var peng = _v16.a;
-								var rest = _v16.b;
-								var newModel = A3($author$project$Main$addShown, model, peng, r.requester);
-								var withNewTurn = A3(
-									$author$project$Main$updateHand,
+								var _v15 = _v13.a;
+								var peng = _v15.a;
+								var rest = _v15.b;
+								var newModel = updatedModel(
+									A3(
+										$author$project$Main$updateHand,
+										shownModel(peng),
+										rest,
+										r.requester));
+								return _Utils_Tuple2(
 									_Utils_update(
 										newModel,
-										{canChi: false, canGang: false, canPeng: false, chiTiles: $elm$core$Maybe$Nothing, discard: $elm$core$Maybe$Nothing, gangTiles: $elm$core$Maybe$Nothing, justMelded: !r.requester, pengTiles: $elm$core$Maybe$Nothing, request: $elm$core$Maybe$Nothing, turn: r.requester}),
-									rest,
-									r.requester);
-								return _Utils_Tuple2(withNewTurn, $elm$core$Platform$Cmd$none);
+										{justMelded: !r.requester}),
+									$elm$core$Platform$Cmd$none);
 							default:
-								var _v17 = _v14.a;
-								var chi = _v17.a;
-								var rest = _v17.b;
-								var newModel = A3($author$project$Main$addShown, model, chi, r.requester);
-								var withNewTurn = A3(
-									$author$project$Main$updateHand,
+								var _v16 = _v13.a;
+								var chi = _v16.a;
+								var rest = _v16.b;
+								var newModel = updatedModel(
+									A3(
+										$author$project$Main$updateHand,
+										shownModel(chi),
+										rest,
+										r.requester));
+								return _Utils_Tuple2(
 									_Utils_update(
 										newModel,
-										{canChi: false, canGang: false, canPeng: false, chiTiles: $elm$core$Maybe$Nothing, discard: $elm$core$Maybe$Nothing, gangTiles: $elm$core$Maybe$Nothing, justMelded: !r.requester, pengTiles: $elm$core$Maybe$Nothing, request: $elm$core$Maybe$Nothing, turn: r.requester}),
-									rest,
-									r.requester);
-								return _Utils_Tuple2(withNewTurn, $elm$core$Platform$Cmd$none);
+										{justMelded: !r.requester}),
+									$elm$core$Platform$Cmd$none);
 						}
 					}
 				case 'PlayerSelect':
@@ -7281,11 +7272,11 @@ var $author$project$Main$update = F2(
 						A2($author$project$Main$playerSelect, model, n),
 						$elm$core$Platform$Cmd$none);
 				case 'PlayerDiscard':
-					var _v18 = model.playerSelected;
-					if (_v18.$ === 'Nothing') {
+					var _v17 = model.playerSelected;
+					if (_v17.$ === 'Nothing') {
 						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					} else {
-						var t = _v18.a;
+						var t = _v17.a;
 						var newHand = A2($author$project$Tile$remove, t, model.playerHand);
 						var $temp$msg = $author$project$Main$RunGame,
 							$temp$model = _Utils_update(
@@ -7314,20 +7305,20 @@ var $author$project$Main$update = F2(
 								canPeng: false,
 								discard: $elm$core$Maybe$Nothing,
 								message: function () {
-									var _v19 = model.discard;
-									if (_v19.$ === 'Nothing') {
+									var _v18 = model.discard;
+									if (_v18.$ === 'Nothing') {
 										return 'you self-touch win, you god!';
 									} else {
-										var dt = _v19.a;
+										var dt = _v18.a;
 										return 'you win off of CPU ' + ($elm$core$Debug$toString(dt.discarder) + '\'s discard!');
 									}
 								}(),
 								playerHand: function () {
-									var _v20 = model.discard;
-									if (_v20.$ === 'Nothing') {
+									var _v19 = model.discard;
+									if (_v19.$ === 'Nothing') {
 										return model.playerHand;
 									} else {
-										var dt = _v20.a;
+										var dt = _v19.a;
 										return A2($elm$core$List$cons, dt.tile, model.playerHand);
 									}
 								}(),
@@ -7335,8 +7326,8 @@ var $author$project$Main$update = F2(
 							}),
 						$elm$core$Platform$Cmd$none);
 				case 'PlayerGang':
-					var _v21 = model.gangTiles;
-					if (_v21.$ === 'Nothing') {
+					var _v20 = model.gangTiles;
+					if (_v20.$ === 'Nothing') {
 						var $temp$msg = $author$project$Main$CheckRequests,
 							$temp$model = _Utils_update(
 							model,
@@ -7345,9 +7336,9 @@ var $author$project$Main$update = F2(
 						model = $temp$model;
 						continue update;
 					} else {
-						var _v22 = _v21.a;
-						var g = _v22.a;
-						var r = _v22.b;
+						var _v21 = _v20.a;
+						var g = _v21.a;
+						var r = _v21.b;
 						var $temp$msg = $author$project$Main$CheckRequests,
 							$temp$model = _Utils_update(
 							model,
@@ -7364,8 +7355,8 @@ var $author$project$Main$update = F2(
 						continue update;
 					}
 				case 'PlayerPeng':
-					var _v23 = model.pengTiles;
-					if (_v23.$ === 'Nothing') {
+					var _v22 = model.pengTiles;
+					if (_v22.$ === 'Nothing') {
 						var $temp$msg = $author$project$Main$CheckRequests,
 							$temp$model = _Utils_update(
 							model,
@@ -7374,11 +7365,11 @@ var $author$project$Main$update = F2(
 						model = $temp$model;
 						continue update;
 					} else {
-						var _v24 = _v23.a;
-						var p = _v24.a;
-						var r = _v24.b;
-						var _v25 = model.request;
-						if (_v25.$ === 'Nothing') {
+						var _v23 = _v22.a;
+						var p = _v23.a;
+						var r = _v23.b;
+						var _v24 = model.request;
+						if (_v24.$ === 'Nothing') {
 							var $temp$msg = $author$project$Main$CheckRequests,
 								$temp$model = _Utils_update(
 								model,
@@ -7394,9 +7385,9 @@ var $author$project$Main$update = F2(
 							model = $temp$model;
 							continue update;
 						} else {
-							var req = _v25.a;
-							var _v26 = req.attempt;
-							if (_v26.$ === 'Gang') {
+							var req = _v24.a;
+							var _v25 = req.attempt;
+							if (_v25.$ === 'Gang') {
 								var $temp$msg = $author$project$Main$CheckRequests,
 									$temp$model = model;
 								msg = $temp$msg;
@@ -7421,8 +7412,8 @@ var $author$project$Main$update = F2(
 						}
 					}
 				default:
-					var _v27 = model.chiTiles;
-					if (_v27.$ === 'Nothing') {
+					var _v26 = model.chiTiles;
+					if (_v26.$ === 'Nothing') {
 						var $temp$msg = $author$project$Main$CheckRequests,
 							$temp$model = _Utils_update(
 							model,
@@ -7431,11 +7422,11 @@ var $author$project$Main$update = F2(
 						model = $temp$model;
 						continue update;
 					} else {
-						var _v28 = _v27.a;
-						var c = _v28.a;
-						var r = _v28.b;
-						var _v29 = model.request;
-						if (_v29.$ === 'Nothing') {
+						var _v27 = _v26.a;
+						var c = _v27.a;
+						var r = _v27.b;
+						var _v28 = model.request;
+						if (_v28.$ === 'Nothing') {
 							var $temp$msg = $author$project$Main$CheckRequests,
 								$temp$model = _Utils_update(
 								model,

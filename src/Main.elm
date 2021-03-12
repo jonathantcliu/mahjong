@@ -604,22 +604,9 @@ update msg model =
     CheckRequests ->
       case model.request of
         Nothing ->
-          if model.turn == 0 then -- clean up this if/then/else statment
-            case model.discard of
-              Nothing ->
-                (model, Cmd.none)
-              _ -> -- player discarded something
-                if model.canNewGame then
-                  (model, Cmd.none)
-                else
-                  update
-                  RunGame
-                  { model
-                  | turn = modBy 4 (model.turn + 1)
-                  , discard = Nothing
-                  , gangTiles = Nothing
-                  , pengTiles = Nothing
-                  , chiTiles = Nothing }
+          if model.canNewGame ||
+          (model.turn == 0 && model.discard == Nothing) then
+            (model, Cmd.none)
           else
             update
             RunGame
@@ -630,75 +617,50 @@ update msg model =
             , pengTiles = Nothing
             , chiTiles = Nothing }
         Just r -> -- declare newModel and withNewTurn up here
-          case r.attempt of
-            Hu tiles ->
-              ({model | message = "winner: " ++ Debug.toString r.requester},
-              Cmd.none)
-            Gang (gang, rest) ->
-              let
-                newModel = addShown model gang r.requester
-                withNewTurn = updateHand
-                              { newModel
-                              | turn = r.requester
-                              , canGang = False
-                              , canPeng = False
-                              , canChi = False
-                              , request = Nothing
-                              , discard = Nothing
-                              , gangTiles = Nothing
-                              , pengTiles = Nothing
-                              , chiTiles = Nothing
-                              , justMelded = False } -- need to draw!
-                              --, justMelded = r.requester == 0 }
-                              rest
-                              r.requester
-              in -- runGame with Gang?
-                update
-                RunGame
-                withNewTurn
-                -- (withNewTurn, Cmd.none)
-            Peng (peng, rest) ->
-              let
-                newModel = addShown model peng r.requester
-                withNewTurn = updateHand
-                              { newModel
-                              | turn = r.requester
-                              , canGang = False
-                              , canPeng = False
-                              , canChi = False
-                              , request = Nothing
-                              , discard = Nothing
-                              , gangTiles = Nothing
-                              , pengTiles = Nothing
-                              , chiTiles = Nothing
-                              , justMelded = r.requester == 0 } -- should be True?
-                              rest
-                              r.requester
-              in
-                -- update
-                -- RunGame
-                (withNewTurn, Cmd.none)
-            Chi (chi, rest) ->
-              let
-                newModel = addShown model chi r.requester
-                withNewTurn = updateHand
-                              { newModel
-                              | turn = r.requester
-                              , canGang = False
-                              , canPeng = False
-                              , canChi = False
-                              , request = Nothing
-                              , discard = Nothing
-                              , gangTiles = Nothing
-                              , pengTiles = Nothing
-                              , chiTiles = Nothing
-                              , justMelded = r.requester == 0 } -- should be True?
-                              rest
-                              r.requester
-              in
-                -- update
-                -- RunGame
-                (withNewTurn, Cmd.none)
+          let
+            shownModel meld = addShown model meld r.requester
+            updatedModel m =
+              { m
+              | turn = r.requester
+              , canGang = False
+              , canPeng = False
+              , canChi = False
+              , request = Nothing
+              , discard = Nothing
+              , gangTiles = Nothing
+              , pengTiles = Nothing
+              , chiTiles = Nothing }
+          in
+            case r.attempt of
+              Hu tiles ->
+                ({model | message = "winner: " ++ Debug.toString r.requester},
+                Cmd.none)
+              Gang (gang, rest) ->
+                let
+                  newModel =
+                    updatedModel
+                      (updateHand (shownModel gang) rest r.requester)
+                in
+                  update
+                  RunGame
+                  { newModel
+                  | justMelded = False }
+              Peng (peng, rest) ->
+                let
+                  newModel =
+                    updatedModel
+                      (updateHand (shownModel peng) rest r.requester)
+                in
+                  ( { newModel
+                    | justMelded = r.requester == 0 }, Cmd.none )
+              Chi (chi, rest) ->
+                let
+                  newModel =
+                    updatedModel
+                      (updateHand (shownModel chi) rest r.requester)
+                in
+                  ( { newModel
+                    | justMelded = r.requester == 0}, Cmd.none )
     PlayerSelect n ->
       ( playerSelect model n
       , Cmd.none )
