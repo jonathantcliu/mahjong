@@ -151,11 +151,11 @@ view model =
           ]
           , tr []
             [ td []
-              (makeSpans (Tile.showPlayerHand model.cpu1Hand) 200) -- showCPUHand
+              (makeSpans (Tile.showPlayerHand model.cpu1Hand) 150) -- showCPUHand
             , td []
-              (makeSpans (Tile.showPlayerHand model.cpu2Hand) 200)
+              (makeSpans (Tile.showPlayerHand model.cpu2Hand) 150)
             , td []
-              (makeSpans (Tile.showPlayerHand model.cpu3Hand) 200)
+              (makeSpans (Tile.showPlayerHand model.cpu3Hand) 150)
           ]
         ]
       ]
@@ -530,8 +530,10 @@ update msg model =
             let
               (t, discarder) = (dt.tile, dt.discarder)
             in
-              if discarder == 0 || model.canNewGame then -- add cpu behavior here! 2021/03/11, if discarder == 0 still do cpu move!
+              if model.canNewGame then
                 (model, Cmd.none)
+              else if discarder == 0 then
+                getMove model 1 t discarder -- add cpu behavior here! 2021/03/11, if discarder == 0 still do cpu move!
               else
                 let
                   hand = t::model.playerHand
@@ -566,28 +568,23 @@ update msg model =
                       l ->
                         Just (l, Strategy.removeSublist l hand)
                 in
-                  ( { model
-                      | canHu = hu
-                      , canGang = Strategy.checkForGang model.playerHand t -- gangs /= []
-                      , canPeng = not hu &&
-                        Strategy.checkForPeng model.playerHand t -- pengCount > 0
+                  getMove
+                  { model
+                  | canHu = hu
+                  , canGang = Strategy.checkForGang model.playerHand t -- gangs /= []
+                  , canPeng = not hu &&
+                      Strategy.checkForPeng model.playerHand t -- pengCount > 0
                       -- if hu, disable peng
-                      , canChi = not hu &&
-                        seqsWithTile /= [] && discarder == 3 -- seqCount > 0
+                  , canChi = not hu &&
+                      seqsWithTile /= [] && discarder == 3 -- seqCount > 0
                       -- if hu, disable chi
-                      , gangTiles = gangT
-                      , pengTiles = pengT
-                      , chiTiles = chiT
-                      , message = "calculated tiles" },
-                      --, message = "updated canGang etc." },
-                  Cmd.none )
-                -- ( { model | message = "HELLO" } , Cmd.none) --check if player can hu, gang, peng, chi, update canHu canGang, etc.
-                -- need to update attemptTiles with the tiles for Gang, Peng, etc.
-                -- 2021/03/07, preliminary done 2021/03/07
-              -- here lies spaghetti
-              -- else
-                -- getMove model 1 t discarder
-                -- (model, Cmd.none)
+                  , gangTiles = gangT
+                  , pengTiles = pengT
+                  , chiTiles = chiT
+                  , message = "calculated tiles" }
+                  1
+                  t
+                  discarder
     CheckRequests ->
       case model.request of
         Nothing ->
@@ -603,7 +600,7 @@ update msg model =
             , gangTiles = Nothing
             , pengTiles = Nothing
             , chiTiles = Nothing }
-        Just r -> -- declare newModel and withNewTurn up here
+        Just r ->
           let
             shownModel meld = addShown model meld r.requester
             updatedModel m =
@@ -746,13 +743,6 @@ update msg model =
               update
               CheckRequests
               model
-              --{ model | message = "overruled" }
-    --_ ->
-      -- PlayerGang, PlayerPeng, PlayerChi - get gangTiles, pengTiles, chiTiles
-      -- add to requests if can overrule requests, call CheckRequests no matter what
-      -- 2021/03/07, need to do peng and chi
-      -- 2021/03/08, preliminary done peng and chi, check canChi - needs to check if turn allowed!
-      --(model, Cmd.none)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
