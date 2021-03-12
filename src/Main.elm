@@ -387,11 +387,23 @@ getMove m cpu t discarder =
           Just a ->
             case a of
               Hu _ ->
-                ({ m
-                   | message = "game over, CPU " ++
-                               Debug.toString cpu ++
-                               "wins!" },
-                Cmd.none)
+                let
+                  cpuHand = getHand m cpu
+                  newHand =
+                    case m.discard of
+                      Nothing ->
+                        cpuHand
+                      Just dt ->
+                        dt.tile::cpuHand
+                in
+                  ( updateHand
+                    { m
+                    | message = "game over, CPU " ++
+                        Debug.toString cpu ++
+                        "wins!"
+                    , canNewGame = True }
+                    newHand
+                    cpu, Cmd.none )
               Gang (gang, rest) -> -- overrules anything except for Hu
                 -- let
                 -- newModel = updateHand m rest cpu
@@ -481,7 +493,7 @@ update msg model =
       else
         case model.discard of
           Nothing ->
-            if model.turn == 0 then
+            if model.turn == 0 then -- combine these if/then/else statements
               if model.justMelded then
                 (model, Cmd.none)
               else
@@ -553,34 +565,29 @@ update msg model =
                         (0, [], [])
                   seqsWithTile = Strategy.getMeldWith seqs t
                   gangT =
-                    (
-                      if gangs == [] then Nothing else Just (gangs, gangrest)
-                    )
+                    if gangs == [] then Nothing else Just (gangs, gangrest)
                   pengT =
-                    (
-                      case pengsWithTile of
-                        [] ->
-                          Nothing
-                        l ->
-                          Just (l, Strategy.removeSublist l hand)
-                    )
+                    case pengsWithTile of
+                      [] ->
+                        Nothing
+                      l ->
+                        Just (l, Strategy.removeSublist l hand)
                   chiT =
-                    (
-                      case seqsWithTile of
-                        [] ->
-                          Nothing
-                        l ->
-                          Just (l, Strategy.removeSublist l hand)
-                    )
+                    case seqsWithTile of
+                      [] ->
+                        Nothing
+                      l ->
+                        Just (l, Strategy.removeSublist l hand)
                 in
                   ( { model
                       | canHu = hu
                       , canGang = Strategy.checkForGang model.playerHand t
                       , canPeng = not hu &&
                         Strategy.checkForPeng model.playerHand t
+                      -- if hu, disable peng
                       , canChi = not hu &&
                         seqsWithTile /= [] && discarder == 3
-                      -- can win off of chi
+                      -- if hu, disable chi
                       , gangTiles = gangT
                       , pengTiles = pengT
                       , chiTiles = chiT
@@ -714,23 +721,20 @@ update msg model =
     PlayerHu ->
       ( { model
         | message =
-          (case model.discard of
-            Nothing ->
-              "you self-touch win, you god!"
-            Just dt ->
-              "you win off of CPU " ++
-              Debug.toString dt.discarder ++
-              "'s discard!"
-          )
+            case model.discard of
+              Nothing ->
+                "you self-touch win, you god!"
+              Just dt ->
+                "you win off of CPU " ++
+                  Debug.toString dt.discarder ++
+                  "'s discard!"
         , canNewGame = True
         , playerHand =
-          (
             case model.discard of
               Nothing ->
                 model.playerHand
               Just dt ->
                 dt.tile::model.playerHand
-          )
         , discard = Nothing
         , turn = 0
         , canHu = False
