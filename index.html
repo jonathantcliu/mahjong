@@ -6487,6 +6487,7 @@ var $author$project$Strategy$getMeldWith = F2(
 		}
 	});
 var $elm$core$Basics$modBy = _Basics_modBy;
+var $elm$core$Basics$not = _Basics_not;
 var $author$project$Main$playerSelect = F2(
 	function (model, n) {
 		var select = $elm$core$List$head(
@@ -7154,10 +7155,10 @@ var $author$project$Main$update = F2(
 									_Utils_update(
 										model,
 										{
-											canChi: (!_Utils_eq(seqsWithTile, _List_Nil)) && (discarder === 3),
+											canChi: (!hu) && ((!_Utils_eq(seqsWithTile, _List_Nil)) && (discarder === 3)),
 											canGang: A2($author$project$Strategy$checkForGang, model.playerHand, t),
 											canHu: hu,
-											canPeng: A2($author$project$Strategy$checkForPeng, model.playerHand, t),
+											canPeng: (!hu) && A2($author$project$Strategy$checkForPeng, model.playerHand, t),
 											chiTiles: chiT,
 											gangTiles: gangT,
 											message: 'calculated tiles',
@@ -7648,7 +7649,6 @@ var $author$project$Main$makePlayerSpans = F2(
 			});
 		return A2($elm$core$List$indexedMap, spanmaker, hand);
 	});
-var $elm$core$Basics$not = _Basics_not;
 var $elm$html$Html$table = _VirtualDom_node('table');
 var $elm$html$Html$tbody = _VirtualDom_node('tbody');
 var $elm$html$Html$td = _VirtualDom_node('td');

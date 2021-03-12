@@ -576,8 +576,11 @@ update msg model =
                   ( { model
                       | canHu = hu
                       , canGang = Strategy.checkForGang model.playerHand t
-                      , canPeng = Strategy.checkForPeng model.playerHand t
-                      , canChi = seqsWithTile /= [] && discarder == 3
+                      , canPeng = not hu &&
+                        Strategy.checkForPeng model.playerHand t
+                      , canChi = not hu &&
+                        seqsWithTile /= [] && discarder == 3
+                      -- can win off of chi
                       , gangTiles = gangT
                       , pengTiles = pengT
                       , chiTiles = chiT
