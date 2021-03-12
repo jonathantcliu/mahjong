@@ -401,6 +401,7 @@ getMove m cpu t discarder =
                     | message = "game over, CPU " ++
                         Debug.toString cpu ++
                         "wins!"
+                    , discard = Nothing
                     , canNewGame = True }
                     newHand
                     cpu, Cmd.none )
