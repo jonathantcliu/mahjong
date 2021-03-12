@@ -493,23 +493,39 @@ update msg model =
       else
         case model.discard of
           Nothing ->
-            if model.justMelded then
-              (model, Cmd.none)
+            if model.turn == 0 then -- combine these if/then/else statements
+              if model.justMelded then -- justMelded for CPU too!
+                (model, Cmd.none)
+              else
+                let
+                  (newHand, newDeck)
+                    = Tile.deal (getHand model model.turn) model.deck 1
+                  hu = Strategy.checkWin newHand model.playerMelds
+                  updatedModel =
+                    updateHand model (Tile.sortHand newHand) model.turn
+                in
+                  ( { updatedModel
+                      | deck = newDeck
+                      , canHu = hu
+                      , canGang = False --暗杠?
+                      , canPeng = False
+                      , canChi = False },
+                  Cmd.none )
             else
               let
                 (newHand, newDeck)
                   = Tile.deal (getHand model model.turn) model.deck 1
-                hu = Strategy.checkWin newHand model.playerMelds
-                updatedModel =
-                  updateHand model (Tile.sortHand newHand) model.turn
+                (toDiscard, leftover) = Strategy.findDiscard newHand
+                updatedModel = updateHand model leftover model.turn
               in
-                ( { updatedModel
+                update
+                RunGame
+                { updatedModel
                   | deck = newDeck
-                  , canHu = hu && model.turn == 0 -- player can hu on turn?
+                  , discard = Just (DiscardedTile toDiscard model.turn)
                   , canGang = False --暗杠?
                   , canPeng = False
-                  , canChi = False },
-                  Cmd.none )
+                  , canChi = False }
           Just dt ->
             let
               (t, discarder) = (dt.tile, dt.discarder)
