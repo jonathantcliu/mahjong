@@ -386,7 +386,7 @@ getMove m cpu t discarder =
             getMove m (cpu + 1) t discarder
           Just a ->
             case a of
-              Hu _ ->
+              Hu _ -> -- probably can use tiles passed here haha
                 let
                   cpuHand = getHand m cpu
                   newHand =
