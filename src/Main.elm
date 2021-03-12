@@ -495,7 +495,7 @@ update msg model =
           Nothing ->
             if model.turn == 0 then -- combine these if/then/else statements
               if model.justMelded then -- justMelded for CPU too!
-                (model, Cmd.none)
+                ({model | justMelded = False}, Cmd.none)
               else
                 let
                   (newHand, newDeck)
@@ -512,15 +512,31 @@ update msg model =
                       , canChi = False },
                   Cmd.none )
             else
-              let
-                (newHand, newDeck)
-                  = Tile.deal (getHand model model.turn) model.deck 1
-                (toDiscard, leftover) = Strategy.findDiscard newHand
-                updatedModel = updateHand model leftover model.turn
-              in
-                update
-                RunGame
-                { updatedModel
+              if model.justMelded then
+                let
+                  (toDiscard, leftover) =
+                    Strategy.findDiscard (getHand model model.turn)
+                  updatedModel = updateHand model leftover model.turn
+                in
+                  -- update
+                  -- RunGame
+                  ( { updatedModel
+                    -- | deck = newDeck
+                      | discard = Just (DiscardedTile toDiscard model.turn)
+                      , justMelded = False
+                      , canGang = False --暗杠?
+                      , canPeng = False
+                      , canChi = False }, Cmd.none )
+              else
+                let
+                  (newHand, newDeck)
+                    = Tile.deal (getHand model model.turn) model.deck 1
+                  (toDiscard, leftover) = Strategy.findDiscard newHand
+                  updatedModel = updateHand model leftover model.turn
+                in
+                  update
+                  RunGame
+                  { updatedModel
                   | deck = newDeck
                   , discard = Just (DiscardedTile toDiscard model.turn)
                   , canGang = False --暗杠?
@@ -635,16 +651,20 @@ update msg model =
                     updatedModel
                       (updateHand (shownModel peng) rest r.requester)
                 in
-                  ( { newModel
-                    | justMelded = r.requester == 0 }, Cmd.none )
+                  update
+                  RunGame
+                  { newModel
+                  | justMelded = True } -- was r.requester == 0
               Chi (chi, rest) ->
                 let
                   newModel =
                     updatedModel
                       (updateHand (shownModel chi) rest r.requester)
                 in
-                  ( { newModel
-                    | justMelded = r.requester == 0}, Cmd.none )
+                  update
+                  RunGame
+                  { newModel
+                  | justMelded = True } -- was r.requester == 0
     PlayerSelect n ->
       ( playerSelect model n
       , Cmd.none )
