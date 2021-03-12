@@ -142,27 +142,27 @@ view model =
         , tbody []
           [ tr []
             [ td []
-              (makeSpans (Tile.showPlayerHand model.cpu1Shown) 50)
+              (makeSpans (Tile.showPlayerHand model.cpu1Shown) 30)
             , td []
-              (makeSpans (Tile.showPlayerHand model.cpu2Shown) 50)
+              (makeSpans (Tile.showPlayerHand model.cpu2Shown) 30)
             , td []
-              (makeSpans (Tile.showPlayerHand model.cpu3Shown) 50)
+              (makeSpans (Tile.showPlayerHand model.cpu3Shown) 30)
             ]
           ]
           , tr []
             [ td []
-              (makeSpans (Tile.showPlayerHand model.cpu1Hand) 150) -- showCPUHand
+              (makeSpans (Tile.showPlayerHand model.cpu1Hand) 30) -- showCPUHand
             , td []
-              (makeSpans (Tile.showPlayerHand model.cpu2Hand) 150)
+              (makeSpans (Tile.showPlayerHand model.cpu2Hand) 30)
             , td []
-              (makeSpans (Tile.showPlayerHand model.cpu3Hand) 150)
+              (makeSpans (Tile.showPlayerHand model.cpu3Hand) 30)
           ]
         ]
       ]
     , table [ attribute "class" "discardtile" ]
       [ thead []
         [ tr []
-          [ th [] (makeDiscardSpan model.discard 50)
+          [ th [] (makeDiscardSpan model.discard 80)
           ]
         ]
       ]
@@ -175,13 +175,13 @@ view model =
       , tbody []
         [ tr []
           [ td []
-            (makeSpans (Tile.showPlayerHand model.playerShown) 100)
+            (makeSpans (Tile.showPlayerHand model.playerShown) 50)
           ]
         ]
         , tr []
           [ td []
             (makePlayerSpans
-              (Tile.showPlayerHand (Tile.sortHand model.playerHand)) 250)
+              (Tile.showPlayerHand (Tile.sortHand model.playerHand)) 80)
         ]
       ]
     , table [ attribute "class" "interaction-buttons" ]
@@ -259,7 +259,7 @@ makeSpans : List String -> Int -> List (Html msg)
 makeSpans hand n =
   let
     len = List.length hand
-    s = Debug.toString (n + (50 - (len * 17)))
+    s = Debug.toString n -- (n + (50 - (len * 17)))
     spanmaker x =
       span [ attribute "style" ("font-size: " ++ s ++ "px;")] [text x]
     in
@@ -277,7 +277,7 @@ makePlayerSpans : List String -> Int -> List (Html Msg)
 makePlayerSpans hand n =
   let
     len = List.length hand
-    s = Debug.toString (n + (50 - (len * 17)))
+    s = Debug.toString n --(n + (50 - (len * 17)))
     spanmaker index x =
       span
         [ attribute "style" ("font-size: " ++ s ++ "px;")]
@@ -400,7 +400,7 @@ getMove m cpu t discarder =
                     { m
                     | message = "game over, CPU " ++
                         Debug.toString cpu ++
-                        "wins!"
+                        " wins!"
                     , discard = Nothing
                     , canNewGame = True }
                     newHand
@@ -550,7 +550,7 @@ update msg model =
               if model.canNewGame then
                 (model, Cmd.none)
               else if discarder == 0 then
-                getMove model 1 t discarder -- add cpu behavior here! 2021/03/11, if discarder == 0 still do cpu move!
+                getMove model 1 t discarder
               else
                 let
                   hand = t::model.playerHand
