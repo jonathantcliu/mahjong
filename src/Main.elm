@@ -494,7 +494,7 @@ update msg model =
         case model.discard of
           Nothing ->
             if model.turn == 0 then -- combine these if/then/else statements
-              if model.justMelded then
+              if model.justMelded then -- justMelded for CPU too!
                 (model, Cmd.none)
               else
                 let
@@ -532,7 +532,7 @@ update msg model =
                   , canChi = False
                   -- reset gangTiles?
                   --, message = "processed game for " ++ Debug.toString model.turn
-                  , turn = modBy 4 (model.turn) }
+                  , turn = modBy 4 (model.turn) } -- this line is useless
                 {-
                 ( { updatedModel
                   | deck = newDeck
@@ -581,12 +581,12 @@ update msg model =
                 in
                   ( { model
                       | canHu = hu
-                      , canGang = Strategy.checkForGang model.playerHand t
+                      , canGang = Strategy.checkForGang model.playerHand t -- gangs /= []
                       , canPeng = not hu &&
-                        Strategy.checkForPeng model.playerHand t
+                        Strategy.checkForPeng model.playerHand t -- pengCount > 0
                       -- if hu, disable peng
                       , canChi = not hu &&
-                        seqsWithTile /= [] && discarder == 3
+                        seqsWithTile /= [] && discarder == 3 -- seqCount > 0
                       -- if hu, disable chi
                       , gangTiles = gangT
                       , pengTiles = pengT
@@ -604,7 +604,7 @@ update msg model =
     CheckRequests ->
       case model.request of
         Nothing ->
-          if model.turn == 0 then
+          if model.turn == 0 then -- clean up this if/then/else statment
             case model.discard of
               Nothing ->
                 (model, Cmd.none)
@@ -629,7 +629,7 @@ update msg model =
             , gangTiles = Nothing
             , pengTiles = Nothing
             , chiTiles = Nothing }
-        Just r ->
+        Just r -> -- declare newModel and withNewTurn up here
           case r.attempt of
             Hu tiles ->
               ({model | message = "winner: " ++ Debug.toString r.requester},
@@ -671,7 +671,7 @@ update msg model =
                               , gangTiles = Nothing
                               , pengTiles = Nothing
                               , chiTiles = Nothing
-                              , justMelded = r.requester == 0 }
+                              , justMelded = r.requester == 0 } -- should be True?
                               rest
                               r.requester
               in
@@ -692,7 +692,7 @@ update msg model =
                               , gangTiles = Nothing
                               , pengTiles = Nothing
                               , chiTiles = Nothing
-                              , justMelded = r.requester == 0 }
+                              , justMelded = r.requester == 0 } -- should be True?
                               rest
                               r.requester
               in
