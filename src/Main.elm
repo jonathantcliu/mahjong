@@ -175,7 +175,7 @@ view model =
       , tbody []
         [ tr []
           [ td []
-            (makePlayerSpans (Tile.showPlayerHand model.playerShown) 100)
+            (makeSpans (Tile.showPlayerHand model.playerShown) 100)
           ]
         ]
         , tr []
