@@ -139,10 +139,17 @@ countGang tiles newtile =
 handleNumbered : List Tile -> (Int, List Tile)
 handleNumbered tiles =
   let
-    (seqNumber, sequences, leftover) = (countSequences tiles) --countPeng
-    (pengNumber, pengs, leftover2) = (countPeng leftover) --countSequences
+    -- calculate peng first and sequences first
+    -- take greater result
+    (seqNumber, sequences, leftover) = countSequences tiles --countPeng
+    (pengNumber, pengs, leftover2) = countPeng leftover -- countSequences
+    (pengNumber2, pengs2, leftover3) = countPeng tiles
+    (seqNumber2, sequences2, leftover4) = countSequences leftover3
   in
-    (seqNumber + pengNumber, leftover2)
+    if seqNumber + pengNumber > pengNumber2 + seqNumber2 then
+      (seqNumber + pengNumber, leftover2)
+    else
+      (seqNumber2 + pengNumber2, leftover4)
 
 combineTuples : List (Int, List Tile) -> (Int, List Tile)
 combineTuples tuples =
@@ -305,7 +312,7 @@ withDiscard tile tiles declared =
   -- if no gang, then try peng, then try chi, else Nothing.
   -- Debug.todo
 
-testHand : List Tile
+testHand : List Tile -- win
 testHand =
   [ Tile Three Bamboo
   , Tile Four Bamboo
@@ -322,7 +329,7 @@ testHand =
   , Tile East Winds
   , Tile East Winds ]
 
-testHand2 : List Tile
+testHand2 : List Tile -- win
 testHand2 =
   [ Tile Five Dots
   , Tile Five Dots
@@ -339,7 +346,7 @@ testHand2 =
   , Tile Seven Characters
   , Tile Eight Characters ]
 
-testHand3 : List Tile
+testHand3 : List Tile -- win
 testHand3 =
   [ Tile Eight Dots
   , Tile Eight Dots
@@ -356,7 +363,7 @@ testHand3 =
   , Tile Red Dragons
   , Tile Red Dragons ]
 
-testHand4 : List Tile
+testHand4 : List Tile -- not win
 testHand4 =
   [ Tile Three Bamboo
   , Tile Four Dots
@@ -374,18 +381,20 @@ testHand4 =
   , Tile White Dragons
   ]
 
-testHand5 : List Tile
+testHand5 : List Tile -- win
 testHand5 =
-  [ Tile Three Bamboo
+  [ Tile One Dots
+  , Tile One Dots
+  , Tile One Dots
+  , Tile Three Dots
+  , Tile Three Dots
   , Tile Three Bamboo
   , Tile Three Bamboo
-  , Tile Three Bamboo ]
-
-testHand6 : List Tile
-testHand6 =
-  [ Tile Seven Dots
-  , Tile Eight Dots
-  , Tile Nine Dots
-  , Tile One Dots ]
-
-thing = Tile Three Bamboo
+  , Tile Three Bamboo
+  , Tile Three Characters
+  , Tile Three Characters
+  , Tile Three Characters
+  , Tile Four Characters
+  , Tile Five Characters
+  , Tile Six Characters
+  ]

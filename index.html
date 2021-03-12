@@ -6095,15 +6095,23 @@ var $author$project$Strategy$countSequences = function (tiles) {
 	}
 };
 var $author$project$Strategy$handleNumbered = function (tiles) {
-	var _v0 = $author$project$Strategy$countSequences(tiles);
-	var seqNumber = _v0.a;
-	var sequences = _v0.b;
-	var leftover = _v0.c;
-	var _v1 = $author$project$Strategy$countPeng(leftover);
-	var pengNumber = _v1.a;
-	var pengs = _v1.b;
-	var leftover2 = _v1.c;
-	return _Utils_Tuple2(seqNumber + pengNumber, leftover2);
+	var _v0 = $author$project$Strategy$countPeng(tiles);
+	var pengNumber2 = _v0.a;
+	var pengs2 = _v0.b;
+	var leftover3 = _v0.c;
+	var _v1 = $author$project$Strategy$countSequences(leftover3);
+	var seqNumber2 = _v1.a;
+	var sequences2 = _v1.b;
+	var leftover4 = _v1.c;
+	var _v2 = $author$project$Strategy$countSequences(tiles);
+	var seqNumber = _v2.a;
+	var sequences = _v2.b;
+	var leftover = _v2.c;
+	var _v3 = $author$project$Strategy$countPeng(leftover);
+	var pengNumber = _v3.a;
+	var pengs = _v3.b;
+	var leftover2 = _v3.c;
+	return (_Utils_cmp(seqNumber + pengNumber, pengNumber2 + seqNumber2) > 0) ? _Utils_Tuple2(seqNumber + pengNumber, leftover2) : _Utils_Tuple2(seqNumber2 + pengNumber2, leftover4);
 };
 var $author$project$Strategy$checkWin = F2(
 	function (tiles, declared) {
@@ -6445,8 +6453,8 @@ var $author$project$Strategy$findDiscard = function (tiles) {
 			return _Debug_todo(
 				'Strategy',
 				{
-					start: {line: 217, column: 13},
-					end: {line: 217, column: 23}
+					start: {line: 224, column: 13},
+					end: {line: 224, column: 23}
 				})('Exception: discard called on empty');
 		} else {
 			var ft = _v1.a;
