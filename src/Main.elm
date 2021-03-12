@@ -731,6 +731,7 @@ update msg model =
               Just dt ->
                 dt.tile::model.playerHand
           )
+        , discard = Nothing
         , turn = 0
         , canHu = False
         , canGang = False
