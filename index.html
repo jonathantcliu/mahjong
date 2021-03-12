@@ -6345,130 +6345,6 @@ var $author$project$Tile$dealAll = function (deck) {
 	var d5 = _v3.b;
 	return A5($author$project$Tile$Hands, d5, playerHand, cpu1Hand, cpu2Hand, cpu3Hand);
 };
-var $author$project$Strategy$findDiscardHelper = function (maybes) {
-	findDiscardHelper:
-	while (true) {
-		if (!maybes.b) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var first = maybes.a;
-			var rest = maybes.b;
-			if (first.$ === 'Nothing') {
-				var $temp$maybes = rest;
-				maybes = $temp$maybes;
-				continue findDiscardHelper;
-			} else {
-				var t = first.a;
-				return $elm$core$Maybe$Just(t);
-			}
-		}
-	}
-};
-var $author$project$Tile$sortNumbered = function (hand) {
-	var tile = $elm$core$List$head(hand);
-	var numbers = A2($elm$core$List$map, $author$project$Tile$tileToInt, hand);
-	var sorted = $elm$core$List$sort(numbers);
-	if (tile.$ === 'Nothing') {
-		return _List_Nil;
-	} else {
-		var t = tile.a;
-		return A2(
-			$elm$core$List$map,
-			function (n) {
-				return A2(
-					$author$project$Tile$Tile,
-					$author$project$Tile$intToValue(n),
-					t.suit);
-			},
-			sorted);
-	}
-};
-var $author$project$Strategy$findDiscardInterval = function (tiles) {
-	findDiscardInterval:
-	while (true) {
-		var sorted = $author$project$Tile$sortNumbered(tiles);
-		if (!sorted.b) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			if (!sorted.b.b) {
-				var singleton = sorted.a;
-				return $elm$core$Maybe$Just(singleton);
-			} else {
-				var first = sorted.a;
-				var _v1 = sorted.b;
-				var second = _v1.a;
-				var rest = _v1.b;
-				if (($author$project$Tile$tileToInt(second) - $author$project$Tile$tileToInt(first)) > 2) {
-					return $elm$core$Maybe$Just(first);
-				} else {
-					var $temp$tiles = rest;
-					tiles = $temp$tiles;
-					continue findDiscardInterval;
-				}
-			}
-		}
-	}
-};
-var $author$project$Strategy$findDiscardOrdinal = function (tiles) {
-	findDiscardOrdinal:
-	while (true) {
-		if (!tiles.b) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var t = tiles.a;
-			var rest = tiles.b;
-			if (!A2($author$project$Strategy$countTiles, rest, t)) {
-				return $elm$core$Maybe$Just(t);
-			} else {
-				var $temp$tiles = A2(
-					$elm$core$List$filter,
-					function (x) {
-						return !_Utils_eq(x, t);
-					},
-					rest);
-				tiles = $temp$tiles;
-				continue findDiscardOrdinal;
-			}
-		}
-	}
-};
-var $author$project$Strategy$findDiscard = function (tiles) {
-	var discards = _List_fromArray(
-		[
-			$author$project$Strategy$findDiscardOrdinal(
-			A2($author$project$Tile$collect, $author$project$Tile$Winds, tiles)),
-			$author$project$Strategy$findDiscardOrdinal(
-			A2($author$project$Tile$collect, $author$project$Tile$Dragons, tiles)),
-			$author$project$Strategy$findDiscardInterval(
-			A2($author$project$Tile$collect, $author$project$Tile$Dots, tiles)),
-			$author$project$Strategy$findDiscardInterval(
-			A2($author$project$Tile$collect, $author$project$Tile$Bamboo, tiles)),
-			$author$project$Strategy$findDiscardInterval(
-			A2($author$project$Tile$collect, $author$project$Tile$Characters, tiles))
-		]);
-	var first = $author$project$Strategy$findDiscardHelper(discards);
-	if (first.$ === 'Nothing') {
-		var _v1 = $elm$core$List$head(tiles);
-		if (_v1.$ === 'Nothing') {
-			return _Debug_todo(
-				'Strategy',
-				{
-					start: {line: 224, column: 13},
-					end: {line: 224, column: 23}
-				})('Exception: discard called on empty');
-		} else {
-			var ft = _v1.a;
-			return _Utils_Tuple2(
-				ft,
-				A2($author$project$Tile$remove, ft, tiles));
-		}
-	} else {
-		var t = first.a;
-		return _Utils_Tuple2(
-			t,
-			A2($author$project$Tile$remove, t, tiles));
-	}
-};
 var $author$project$Main$getHand = F2(
 	function (model, n) {
 		return (!n) ? model.playerHand : ((n === 1) ? model.cpu1Hand : ((n === 2) ? model.cpu2Hand : ((n === 3) ? model.cpu3Hand : _List_Nil)));
@@ -6975,6 +6851,25 @@ var $author$project$Main$shuffleDeck = A2(
 	$elm$random$Random$generate,
 	$author$project$Main$ShuffleDeck,
 	$elm_community$random_extra$Random$List$shuffle($author$project$Tile$initDeck));
+var $author$project$Tile$sortNumbered = function (hand) {
+	var tile = $elm$core$List$head(hand);
+	var numbers = A2($elm$core$List$map, $author$project$Tile$tileToInt, hand);
+	var sorted = $elm$core$List$sort(numbers);
+	if (tile.$ === 'Nothing') {
+		return _List_Nil;
+	} else {
+		var t = tile.a;
+		return A2(
+			$elm$core$List$map,
+			function (n) {
+				return A2(
+					$author$project$Tile$Tile,
+					$author$project$Tile$intToValue(n),
+					t.suit);
+			},
+			sorted);
+	}
+};
 var $author$project$Tile$sortHand = function (hand) {
 	var winds = A2($author$project$Tile$collect, $author$project$Tile$Winds, hand);
 	var dragons = A2($author$project$Tile$collect, $author$project$Tile$Dragons, hand);
@@ -7046,70 +6941,41 @@ var $author$project$Main$update = F2(
 					} else {
 						var _v1 = model.discard;
 						if (_v1.$ === 'Nothing') {
-							if (!model.turn) {
-								if (model.justMelded) {
-									return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-								} else {
-									var _v2 = A3(
-										$author$project$Tile$deal,
-										A2($author$project$Main$getHand, model, model.turn),
-										model.deck,
-										1);
-									var newHand = _v2.a;
-									var newDeck = _v2.b;
-									var hu = A2($author$project$Strategy$checkWin, newHand, model.playerMelds);
-									var updatedModel = A3(
-										$author$project$Main$updateHand,
-										model,
-										$author$project$Tile$sortHand(newHand),
-										model.turn);
-									return _Utils_Tuple2(
-										_Utils_update(
-											updatedModel,
-											{canChi: false, canGang: false, canHu: hu, canPeng: false, deck: newDeck}),
-										$elm$core$Platform$Cmd$none);
-								}
+							if (model.justMelded) {
+								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 							} else {
-								var _v3 = A3(
+								var _v2 = A3(
 									$author$project$Tile$deal,
 									A2($author$project$Main$getHand, model, model.turn),
 									model.deck,
 									1);
-								var newHand = _v3.a;
-								var newDeck = _v3.b;
-								var _v4 = $author$project$Strategy$findDiscard(newHand);
-								var toDiscard = _v4.a;
-								var leftover = _v4.b;
-								var updatedModel = A3($author$project$Main$updateHand, model, leftover, model.turn);
-								var $temp$msg = $author$project$Main$RunGame,
-									$temp$model = _Utils_update(
-									updatedModel,
-									{
-										canChi: false,
-										canGang: false,
-										canPeng: false,
-										deck: newDeck,
-										discard: $elm$core$Maybe$Just(
-											A2($author$project$Main$DiscardedTile, toDiscard, model.turn)),
-										turn: A2($elm$core$Basics$modBy, 4, model.turn)
-									});
-								msg = $temp$msg;
-								model = $temp$model;
-								continue update;
+								var newHand = _v2.a;
+								var newDeck = _v2.b;
+								var hu = A2($author$project$Strategy$checkWin, newHand, model.playerMelds);
+								var updatedModel = A3(
+									$author$project$Main$updateHand,
+									model,
+									$author$project$Tile$sortHand(newHand),
+									model.turn);
+								return _Utils_Tuple2(
+									_Utils_update(
+										updatedModel,
+										{canChi: false, canGang: false, canHu: hu && (!model.turn), canPeng: false, deck: newDeck}),
+									$elm$core$Platform$Cmd$none);
 							}
 						} else {
 							var dt = _v1.a;
-							var _v5 = _Utils_Tuple2(dt.tile, dt.discarder);
-							var t = _v5.a;
-							var discarder = _v5.b;
+							var _v3 = _Utils_Tuple2(dt.tile, dt.discarder);
+							var t = _v3.a;
+							var discarder = _v3.b;
 							if ((!discarder) || model.canNewGame) {
 								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 							} else {
 								var hand = A2($elm$core$List$cons, t, model.playerHand);
 								var hu = A2($author$project$Strategy$checkWin, hand, model.playerMelds);
-								var _v6 = function () {
-									var _v7 = t.suit;
-									switch (_v7.$) {
+								var _v4 = function () {
+									var _v5 = t.suit;
+									switch (_v5.$) {
 										case 'Dots':
 											return $author$project$Strategy$countSequences(
 												A2($author$project$Tile$collect, $author$project$Tile$Dots, hand));
@@ -7123,9 +6989,9 @@ var $author$project$Main$update = F2(
 											return _Utils_Tuple3(0, _List_Nil, _List_Nil);
 									}
 								}();
-								var seqCount = _v6.a;
-								var seqs = _v6.b;
-								var seqrest = _v6.c;
+								var seqCount = _v4.a;
+								var seqs = _v4.b;
+								var seqrest = _v4.c;
 								var seqsWithTile = A2($author$project$Strategy$getMeldWith, seqs, t);
 								var chiT = function () {
 									if (!seqsWithTile.b) {
@@ -7138,10 +7004,10 @@ var $author$project$Main$update = F2(
 												A2($author$project$Strategy$removeSublist, l, hand)));
 									}
 								}();
-								var _v8 = $author$project$Strategy$countPeng(hand);
-								var pengCount = _v8.a;
-								var pengs = _v8.b;
-								var pengrest = _v8.c;
+								var _v6 = $author$project$Strategy$countPeng(hand);
+								var pengCount = _v6.a;
+								var pengs = _v6.b;
+								var pengrest = _v6.c;
 								var pengsWithTile = A2($author$project$Strategy$getMeldWith, pengs, t);
 								var pengT = function () {
 									if (!pengsWithTile.b) {
@@ -7154,9 +7020,9 @@ var $author$project$Main$update = F2(
 												A2($author$project$Strategy$removeSublist, l, hand)));
 									}
 								}();
-								var _v9 = A2($author$project$Strategy$countGang, model.playerHand, t);
-								var gangs = _v9.a;
-								var gangrest = _v9.b;
+								var _v7 = A2($author$project$Strategy$countGang, model.playerHand, t);
+								var gangs = _v7.a;
+								var gangrest = _v7.b;
 								var gangT = _Utils_eq(gangs, _List_Nil) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
 									_Utils_Tuple2(gangs, gangrest));
 								return _Utils_Tuple2(
@@ -7177,8 +7043,8 @@ var $author$project$Main$update = F2(
 						}
 					}
 				case 'CheckRequests':
-					var _v12 = model.request;
-					if (_v12.$ === 'Nothing') {
+					var _v10 = model.request;
+					if (_v10.$ === 'Nothing') {
 						if (model.canNewGame || ((!model.turn) && _Utils_eq(model.discard, $elm$core$Maybe$Nothing))) {
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						} else {
@@ -7197,7 +7063,7 @@ var $author$project$Main$update = F2(
 							continue update;
 						}
 					} else {
-						var r = _v12.a;
+						var r = _v10.a;
 						var updatedModel = function (m) {
 							return _Utils_update(
 								m,
@@ -7206,10 +7072,10 @@ var $author$project$Main$update = F2(
 						var shownModel = function (meld) {
 							return A3($author$project$Main$addShown, model, meld, r.requester);
 						};
-						var _v13 = r.attempt;
-						switch (_v13.$) {
+						var _v11 = r.attempt;
+						switch (_v11.$) {
 							case 'Hu':
-								var tiles = _v13.a;
+								var tiles = _v11.a;
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
@@ -7218,9 +7084,9 @@ var $author$project$Main$update = F2(
 										}),
 									$elm$core$Platform$Cmd$none);
 							case 'Gang':
-								var _v14 = _v13.a;
-								var gang = _v14.a;
-								var rest = _v14.b;
+								var _v12 = _v11.a;
+								var gang = _v12.a;
+								var rest = _v12.b;
 								var newModel = updatedModel(
 									A3(
 										$author$project$Main$updateHand,
@@ -7235,9 +7101,9 @@ var $author$project$Main$update = F2(
 								model = $temp$model;
 								continue update;
 							case 'Peng':
-								var _v15 = _v13.a;
-								var peng = _v15.a;
-								var rest = _v15.b;
+								var _v13 = _v11.a;
+								var peng = _v13.a;
+								var rest = _v13.b;
 								var newModel = updatedModel(
 									A3(
 										$author$project$Main$updateHand,
@@ -7250,9 +7116,9 @@ var $author$project$Main$update = F2(
 										{justMelded: !r.requester}),
 									$elm$core$Platform$Cmd$none);
 							default:
-								var _v16 = _v13.a;
-								var chi = _v16.a;
-								var rest = _v16.b;
+								var _v14 = _v11.a;
+								var chi = _v14.a;
+								var rest = _v14.b;
 								var newModel = updatedModel(
 									A3(
 										$author$project$Main$updateHand,
@@ -7272,11 +7138,11 @@ var $author$project$Main$update = F2(
 						A2($author$project$Main$playerSelect, model, n),
 						$elm$core$Platform$Cmd$none);
 				case 'PlayerDiscard':
-					var _v17 = model.playerSelected;
-					if (_v17.$ === 'Nothing') {
+					var _v15 = model.playerSelected;
+					if (_v15.$ === 'Nothing') {
 						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					} else {
-						var t = _v17.a;
+						var t = _v15.a;
 						var newHand = A2($author$project$Tile$remove, t, model.playerHand);
 						var $temp$msg = $author$project$Main$RunGame,
 							$temp$model = _Utils_update(
@@ -7305,20 +7171,20 @@ var $author$project$Main$update = F2(
 								canPeng: false,
 								discard: $elm$core$Maybe$Nothing,
 								message: function () {
-									var _v18 = model.discard;
-									if (_v18.$ === 'Nothing') {
+									var _v16 = model.discard;
+									if (_v16.$ === 'Nothing') {
 										return 'you self-touch win, you god!';
 									} else {
-										var dt = _v18.a;
+										var dt = _v16.a;
 										return 'you win off of CPU ' + ($elm$core$Debug$toString(dt.discarder) + '\'s discard!');
 									}
 								}(),
 								playerHand: function () {
-									var _v19 = model.discard;
-									if (_v19.$ === 'Nothing') {
+									var _v17 = model.discard;
+									if (_v17.$ === 'Nothing') {
 										return model.playerHand;
 									} else {
-										var dt = _v19.a;
+										var dt = _v17.a;
 										return A2($elm$core$List$cons, dt.tile, model.playerHand);
 									}
 								}(),
@@ -7326,8 +7192,8 @@ var $author$project$Main$update = F2(
 							}),
 						$elm$core$Platform$Cmd$none);
 				case 'PlayerGang':
-					var _v20 = model.gangTiles;
-					if (_v20.$ === 'Nothing') {
+					var _v18 = model.gangTiles;
+					if (_v18.$ === 'Nothing') {
 						var $temp$msg = $author$project$Main$CheckRequests,
 							$temp$model = _Utils_update(
 							model,
@@ -7336,9 +7202,9 @@ var $author$project$Main$update = F2(
 						model = $temp$model;
 						continue update;
 					} else {
-						var _v21 = _v20.a;
-						var g = _v21.a;
-						var r = _v21.b;
+						var _v19 = _v18.a;
+						var g = _v19.a;
+						var r = _v19.b;
 						var $temp$msg = $author$project$Main$CheckRequests,
 							$temp$model = _Utils_update(
 							model,
@@ -7355,8 +7221,8 @@ var $author$project$Main$update = F2(
 						continue update;
 					}
 				case 'PlayerPeng':
-					var _v22 = model.pengTiles;
-					if (_v22.$ === 'Nothing') {
+					var _v20 = model.pengTiles;
+					if (_v20.$ === 'Nothing') {
 						var $temp$msg = $author$project$Main$CheckRequests,
 							$temp$model = _Utils_update(
 							model,
@@ -7365,11 +7231,11 @@ var $author$project$Main$update = F2(
 						model = $temp$model;
 						continue update;
 					} else {
-						var _v23 = _v22.a;
-						var p = _v23.a;
-						var r = _v23.b;
-						var _v24 = model.request;
-						if (_v24.$ === 'Nothing') {
+						var _v21 = _v20.a;
+						var p = _v21.a;
+						var r = _v21.b;
+						var _v22 = model.request;
+						if (_v22.$ === 'Nothing') {
 							var $temp$msg = $author$project$Main$CheckRequests,
 								$temp$model = _Utils_update(
 								model,
@@ -7385,9 +7251,9 @@ var $author$project$Main$update = F2(
 							model = $temp$model;
 							continue update;
 						} else {
-							var req = _v24.a;
-							var _v25 = req.attempt;
-							if (_v25.$ === 'Gang') {
+							var req = _v22.a;
+							var _v23 = req.attempt;
+							if (_v23.$ === 'Gang') {
 								var $temp$msg = $author$project$Main$CheckRequests,
 									$temp$model = model;
 								msg = $temp$msg;
@@ -7412,8 +7278,8 @@ var $author$project$Main$update = F2(
 						}
 					}
 				default:
-					var _v26 = model.chiTiles;
-					if (_v26.$ === 'Nothing') {
+					var _v24 = model.chiTiles;
+					if (_v24.$ === 'Nothing') {
 						var $temp$msg = $author$project$Main$CheckRequests,
 							$temp$model = _Utils_update(
 							model,
@@ -7422,11 +7288,11 @@ var $author$project$Main$update = F2(
 						model = $temp$model;
 						continue update;
 					} else {
-						var _v27 = _v26.a;
-						var c = _v27.a;
-						var r = _v27.b;
-						var _v28 = model.request;
-						if (_v28.$ === 'Nothing') {
+						var _v25 = _v24.a;
+						var c = _v25.a;
+						var r = _v25.b;
+						var _v26 = model.request;
+						if (_v26.$ === 'Nothing') {
 							var $temp$msg = $author$project$Main$CheckRequests,
 								$temp$model = _Utils_update(
 								model,

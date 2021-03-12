@@ -206,6 +206,7 @@ findDiscardHelper maybes =
           Just t
 
 -- tile -> (tile, list tile)
+-- Note: findDiscard needs to find ordinal discards for interval suits!
 findDiscard : List Tile -> (Tile, List Tile)
 findDiscard tiles =
   let

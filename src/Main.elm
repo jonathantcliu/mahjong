@@ -493,57 +493,28 @@ update msg model =
       else
         case model.discard of
           Nothing ->
-            if model.turn == 0 then -- combine these if/then/else statements
-              if model.justMelded then -- justMelded for CPU too!
-                (model, Cmd.none)
-              else
-                let
-                  (newHand, newDeck)
-                    = Tile.deal (getHand model model.turn) model.deck 1
-                  hu = Strategy.checkWin newHand model.playerMelds
-                  updatedModel =
-                    updateHand model (Tile.sortHand newHand) model.turn
-                in
-                  ( { updatedModel
-                      | deck = newDeck
-                      , canHu = hu
-                      , canGang = False --暗杠?
-                      , canPeng = False
-                      , canChi = False },
-                      --, gangTiles = Nothing
-                      --, pengTiles = Nothing
-                      --, chiTiles = Nothing
-                      --, message = "dealt tile to player" },
-                  Cmd.none )
+            if model.justMelded then
+              (model, Cmd.none)
             else
               let
                 (newHand, newDeck)
                   = Tile.deal (getHand model model.turn) model.deck 1
-                (toDiscard, leftover) = Strategy.findDiscard newHand
-                updatedModel = updateHand model leftover model.turn
+                hu = Strategy.checkWin newHand model.playerMelds
+                updatedModel =
+                  updateHand model (Tile.sortHand newHand) model.turn
               in
-                update
-                RunGame
-                { updatedModel
-                  | deck = newDeck
-                  , discard = Just (DiscardedTile toDiscard model.turn)
-                  , canGang = False --暗杠?
-                  , canPeng = False
-                  , canChi = False
-                  -- reset gangTiles?
-                  --, message = "processed game for " ++ Debug.toString model.turn
-                  , turn = modBy 4 (model.turn) } -- this line is useless
-                {-
                 ( { updatedModel
                   | deck = newDeck
-                  , discard = Just (DiscardedTile toDiscard model.turn)
-                  , message = "processed game for " ++ Debug.toString model.turn
-                  , turn = modBy 4 (model.turn) }, Cmd.none) -}
+                  , canHu = hu && model.turn == 0 -- player can hu on turn?
+                  , canGang = False --暗杠?
+                  , canPeng = False
+                  , canChi = False },
+                  Cmd.none )
           Just dt ->
             let
               (t, discarder) = (dt.tile, dt.discarder)
             in
-              if discarder == 0 || model.canNewGame then -- add cpu behavior here! 2021/03/11
+              if discarder == 0 || model.canNewGame then -- add cpu behavior here! 2021/03/11, if discarder == 0 still do cpu move!
                 (model, Cmd.none)
               else
                 let
