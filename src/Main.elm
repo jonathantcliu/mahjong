@@ -560,7 +560,7 @@ update msg model =
                     -- | deck = newDeck
                       | discard = Just (DiscardedTile toDiscard model.turn)
                       , justMelded = False
-                      , canGang = False --暗杠? not player though, add request if can
+                      , canGang = False -- no 暗杠 after meld
                       , canPeng = False
                       , canChi = False }, Cmd.none )
                       -- , message = "CPU " ++ (Debug.toString model.turn) ++ "'s turn"}, Cmd.none )
@@ -568,18 +568,36 @@ update msg model =
                 let
                   (newHand, newDeck)
                     = Tile.deal (getHand model model.turn) model.deck 1
-                  (toDiscard, leftover) = Strategy.findDiscard newHand
-                  updatedModel = updateHand model leftover model.turn
+                  (gangs, gangrest) = Strategy.getDarkGang newHand
                 in
-                  update
-                  RunGame
-                  { updatedModel
-                  | deck = newDeck
-                  , discard = Just (DiscardedTile toDiscard model.turn)
-                  , canGang = False --暗杠?
-                  , canPeng = False
-                  , canChi = False
-                  , message = "CPU " ++ (Debug.toString model.turn) ++ "'s turn"}
+                  if gangs /= [] then
+                    update
+                    CheckRequests
+                    { model
+                    | deck = newDeck
+                    , canGang = False
+                    , canPeng = False
+                    , canChi = False
+                    , request =
+                      Just (Request (Gang (gangs, gangrest)) model.turn)
+                    , message =
+                      "CPU " ++
+                      (Debug.toString model.turn) ++
+                      " declares a hidden Gang" }
+                  else
+                    let
+                      (toDiscard, leftover) = Strategy.findDiscard newHand
+                      updatedModel = updateHand model leftover model.turn
+                    in
+                      update
+                      RunGame
+                      { updatedModel
+                      | deck = newDeck
+                      , discard = Just (DiscardedTile toDiscard model.turn)
+                      , canGang = False --暗杠? not player though, add request if can
+                      , canPeng = False
+                      , canChi = False
+                      , message = "CPU " ++ (Debug.toString model.turn) ++ "'s turn"}
           Just dt ->
             let
               (t, discarder) = (dt.tile, dt.discarder)
