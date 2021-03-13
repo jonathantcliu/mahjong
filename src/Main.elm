@@ -523,7 +523,8 @@ update msg model =
               if model.justMelded then -- justMelded for CPU too!
                 ({model
                 | justMelded = False
-                , message = "Good job! Now find something to discard"}, Cmd.none)
+                , message =
+                  "Good job! Now find something to discard"}, Cmd.none)
               else
                 let
                   (newHand, newDeck)
@@ -531,7 +532,7 @@ update msg model =
                   hu = Strategy.checkWin newHand model.playerMelds
                   updatedModel =
                     updateHand model (Tile.sortHand newHand) model.turn
-                  (gangs, gangrest) = Strategy.getDarkGang newHand -- now newHand instead of model.playerHand
+                  (gangs, gangrest) = Strategy.getDarkGang newHand
                   gangT =
                     if gangs == [] then Nothing else Just (gangs, gangrest)
                 in
@@ -594,10 +595,12 @@ update msg model =
                       { updatedModel
                       | deck = newDeck
                       , discard = Just (DiscardedTile toDiscard model.turn)
-                      , canGang = False --暗杠? not player though, add request if can
+                      , canGang = False
                       , canPeng = False
                       , canChi = False
-                      , message = "CPU " ++ (Debug.toString model.turn) ++ "'s turn"}
+                      , message = "CPU " ++
+                        (Debug.toString model.turn) ++
+                        "'s turn"}
           Just dt ->
             let
               (t, discarder) = (dt.tile, dt.discarder)
@@ -653,7 +656,8 @@ update msg model =
                   , gangTiles = gangT
                   , pengTiles = pengT
                   , chiTiles = chiT
-                  , message = "You can do it! Pay attention to the buttons below 😀" }
+                  , message =
+                    "You can do it! Pay attention to the buttons below 😀" }
                   1
                   t
                   discarder
@@ -692,8 +696,9 @@ update msg model =
             in
               case r.attempt of
                 Hu tiles ->
-                  ({model | message = "winner: " ++ Debug.toString r.requester},
-                  Cmd.none)
+                  ( { model
+                    | message = "winner: " ++ Debug.toString r.requester },
+                  Cmd.none )
                 Gang (gang, rest) ->
                   let
                     newModel =
