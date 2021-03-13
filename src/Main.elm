@@ -119,9 +119,9 @@ view : Model -> Html Msg
 view model =
   div []
     [ div [ attribute "class" "play-table-column" ]
-      [ h1 [] [ text "🀄 Mahjong 🀄" ]
+      [ h1 [] [ text "🀄 Mahjong 麻將 마작 🀄" ]
       , div [ attribute "class" "message" ]
-        [ text (model.message ++ " " ++ Debug.toString (model.gangTiles) ++ " " ++ Debug.toString (model.pengTiles) ++ " " ++ Debug.toString (model.chiTiles)) ]
+        [ text (model.message) ] -- debug here
       , div [ attribute "class" "new-game" ]
         (if model.canNewGame then
           [ div [] [ button [ onClick (NewGame 0) ] [ text "Start as East" ] ]
@@ -199,55 +199,55 @@ view model =
                 (if model.turn == 0 &&
                     model.discard == Nothing &&
                     not model.canNewGame then
-                  button [ onClick PlayerDiscard ] [ text "出牌" ]
+                  button [ onClick PlayerDiscard ] [ text "Discard" ]
                 else
                   button
                     [ onClick PlayerDiscard, attribute "disabled" "true" ]
-                    [ text "无法出牌" ]
+                    [ text "Discard" ]
                 )
               ]
             , td []
               --[ button [ onClick PlayerHu ] [ text "和" ] ]
               [
                 (if model.canHu then
-                  button [ onClick PlayerHu ] [ text "和" ]
+                  button [ onClick PlayerHu ] [ text "Win" ]
                 else
                   button
                     [ onClick PlayerHu, attribute "disabled" "true" ]
-                    [ text "无法和牌" ]
+                    [ text "Win" ]
                 )
               ]
             , td []
               --[ button [ onClick (PlayerGang) ] [ text "杠" ] ]
               [
                 (if model.canGang then
-                  button [ onClick PlayerGang ] [ text "杠" ]
+                  button [ onClick PlayerGang ] [ text "Gang" ]
                 else
                   button
                     [ onClick PlayerGang, attribute "disabled" "true" ]
-                    [ text "无法杠牌" ]
+                    [ text "Gang" ]
                 )
               ]
             , td []
               --[ button [ onClick (PlayerPeng) ] [ text "碰" ] ]
               [
                 (if model.canPeng then
-                  button [ onClick PlayerPeng ] [ text "碰" ]
+                  button [ onClick PlayerPeng ] [ text "Peng" ]
                 else
                   button
                     [ onClick PlayerPeng, attribute "disabled" "true" ]
-                    [ text "无法碰牌" ]
+                    [ text "Peng" ]
                 )
               ]
             , td []
               --[ button [ onClick (PlayerChi) ] [ text "吃" ] ]
               [
                 (if model.canChi then
-                  button [ onClick PlayerChi ] [ text "吃" ]
+                  button [ onClick PlayerChi ] [ text "Chi" ]
                 else
                   button
                     [ onClick PlayerChi, attribute "disabled" "true" ]
-                    [ text "无法吃牌" ]
+                    [ text "Chi" ]
                 )
               ]
           ]
@@ -400,7 +400,7 @@ getMove m cpu t discarder =
                   -- CheckRequests
                   ((updateHand
                   { m
-                  | message = "game over, CPU " ++
+                  | message = "Game over, CPU " ++
                       Debug.toString cpu ++
                       " wins!"
                   , discard = Nothing
@@ -433,7 +433,7 @@ getMove m cpu t discarder =
                     case g.attempt of
                       Gang (_, _) ->
                         getMove
-                        { m | message = "overruled"}
+                        { m | message = "CPU " ++ (Debug.toString cpu) ++ " overruled"}
                         (cpu + 1)
                         t
                         discarder
@@ -463,13 +463,13 @@ getMove m cpu t discarder =
                       discarder
                     else
                       getMove
-                      { m | message = "chi not allowed" }
+                      { m | message = "CPU " ++ (Debug.toString cpu) ++ "'s chi attempt failed" }
                       (cpu + 1)
                       t
                       discarder
                   _ ->
                     getMove
-                    { m | message = "overruled"}
+                    { m | message = "CPU " ++ (Debug.toString cpu) ++ " overruled"}
                     (cpu + 1)
                     t
                     discarder
@@ -504,12 +504,16 @@ update msg model =
           , canPeng = False
           , canChi = False },
         Cmd.none )
+      else if model.canNewGame then
+        (model, Cmd.none)
       else
         case model.discard of
           Nothing ->
             if model.turn == 0 then -- combine these if/then/else statements
               if model.justMelded then -- justMelded for CPU too!
-                ({model | justMelded = False}, Cmd.none)
+                ({model
+                | justMelded = False
+                , message = "Find something to discard!"}, Cmd.none)
               else
                 let
                   (newHand, newDeck)
@@ -520,10 +524,15 @@ update msg model =
                 in
                   ( { updatedModel
                       | deck = newDeck
-                      , canHu = hu
-                      , canGang = False --暗杠? calculate gangTiles earlier
+                      , canHu = hu && not updatedModel.canNewGame -- self-touch win
+                      , canGang = False -- 暗杠? calculate gangTiles earlier and do
                       , canPeng = False
-                      , canChi = False },
+                      , canChi = False
+                      , message =
+                        if hu then
+                          "You can win if you want to!"
+                        else
+                          "Find something to discard!" },
                   Cmd.none )
             else
               if model.justMelded then
@@ -541,6 +550,7 @@ update msg model =
                       , canGang = False --暗杠? not player though, add request
                       , canPeng = False
                       , canChi = False }, Cmd.none )
+                      -- , message = "CPU " ++ (Debug.toString model.turn) ++ "'s turn"}, Cmd.none )
               else
                 let
                   (newHand, newDeck)
@@ -555,7 +565,8 @@ update msg model =
                   , discard = Just (DiscardedTile toDiscard model.turn)
                   , canGang = False --暗杠?
                   , canPeng = False
-                  , canChi = False }
+                  , canChi = False
+                  , message = "CPU " ++ (Debug.toString model.turn) ++ "'s turn"}
           Just dt ->
             let
               (t, discarder) = (dt.tile, dt.discarder)
@@ -611,7 +622,7 @@ update msg model =
                   , gangTiles = gangT
                   , pengTiles = pengT
                   , chiTiles = chiT
-                  , message = "calculated tiles" }
+                  , message = "You can do it! Pay attention to the buttons below 😀" }
                   1
                   t
                   discarder
@@ -658,7 +669,12 @@ update msg model =
                   update
                   RunGame
                   { newModel
-                  | justMelded = False }
+                  | justMelded = False
+                  , message =
+                    if r.requester /= 0 then
+                      "Gang from CPU " ++ (Debug.toString r.requester)
+                    else
+                      newModel.message }
               Peng (peng, rest) ->
                 let
                   newModel =
@@ -668,7 +684,12 @@ update msg model =
                   update
                   RunGame
                   { newModel
-                  | justMelded = True } -- was r.requester == 0
+                  | justMelded = True
+                  , message =
+                    if r.requester /= 0 then
+                      "Peng from CPU " ++ (Debug.toString r.requester)
+                    else
+                      newModel.message } -- was r.requester == 0
               Chi (chi, rest) ->
                 let
                   newModel =
@@ -678,7 +699,12 @@ update msg model =
                   update
                   RunGame
                   { newModel
-                  | justMelded = True } -- was r.requester == 0
+                  | justMelded = True
+                  , message =
+                    if r.requester /= 0 then
+                      "Chi from CPU " ++ (Debug.toString r.requester)
+                    else
+                      newModel.message } -- was r.requester == 0
     PlayerSelect n ->
       ( playerSelect model n
       , Cmd.none )
@@ -703,9 +729,9 @@ update msg model =
         | message =
             case model.discard of
               Nothing ->
-                "you self-touch win, you god!"
+                "You self-touch win, you god!"
               Just dt ->
-                "you win off of CPU " ++
+                "You win off of CPU " ++
                   Debug.toString dt.discarder ++
                   "'s discard!"
         , canNewGame = True
