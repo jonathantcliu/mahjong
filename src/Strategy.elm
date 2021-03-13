@@ -141,24 +141,50 @@ handleNumbered tiles =
   let
     -- calculate peng first and sequences first
     -- take greater result
-    (seqNumber, sequences, leftover) = countSequences tiles --countPeng
-    (pengNumber, pengs, leftover2) = countPeng leftover -- countSequences
-    (pengNumber2, pengs2, leftover3) = countPeng tiles
-    (seqNumber2, sequences2, leftover4) = countSequences leftover3
-  in
-    if seqNumber + pengNumber == pengNumber2 + seqNumber2 then
-      case leftover2 of
-        [eye1, eye2] ->
-          if eye1 == eye2 then
-            (seqNumber + pengNumber, leftover2)
+    -- eyeGuesses : List Tile -> (List (List Tile, List Tile)) -> (List (List Tile, List Tile))
+    eyeGuesses ts acc =
+      case ts of
+        [] ->
+          acc
+        t::trest ->
+          if (countTiles ts t) == 2 then
+            eyeGuesses
+            trest
+            (([t, t], trest)::acc)
           else
-            (seqNumber2 + pengNumber2, leftover4)
-        _ ->
-          (seqNumber2 + pengNumber2, leftover4)
-    else if seqNumber + pengNumber > pengNumber2 + seqNumber2 then
-      (seqNumber + pengNumber, leftover2)
-    else
-      (seqNumber2 + pengNumber2, leftover4)
+            eyeGuesses trest acc
+    handleEyeGuesses eyeleftovers =
+      case eyeleftovers of
+        [] ->
+          let
+            (seqNumber, sequences, leftover) = countSequences tiles
+            (pengNumber, pengs, leftover2) = countPeng leftover
+            (pengNumber2, pengs2, leftover3) = countPeng tiles
+            (seqNumber2, sequences2, leftover4) = countSequences leftover3
+          in
+            if seqNumber + pengNumber > pengNumber2 + seqNumber2 then
+              (seqNumber + pengNumber, leftover2)
+            else
+              (seqNumber2 + pengNumber2, leftover4)
+        (eye, leftover)::rest ->
+          let
+            (result, lastleftover) = handleEyeGuesses rest
+            (seqNumber, sequences, leftover1) = countSequences leftover
+            (pengNumber, pengs, leftover2) = countPeng leftover1
+            (pengNumber2, pengs2, leftover3) = countPeng leftover
+            (seqNumber2, sequences2, leftover4) = countSequences leftover3
+          in
+            if result > seqNumber + pengNumber &&
+              result > seqNumber2 + pengNumber2 then
+                (result, lastleftover)
+            else if seqNumber + pengNumber > pengNumber2 + seqNumber2 && leftover2 == [] then
+              (seqNumber + pengNumber, eye)
+            else if leftover4 == [] then
+              (seqNumber2 + pengNumber2, eye)
+            else
+              (result, lastleftover)
+  in
+    handleEyeGuesses (eyeGuesses tiles [])
 
 combineTuples : List (Int, List Tile) -> (Int, List Tile)
 combineTuples tuples =
@@ -416,4 +442,22 @@ testHand6 =
   , Tile Seven Characters
   , Tile Eight Characters
   , Tile Nine Characters
+  ]
+
+testHand7 : List Tile -- win
+testHand7 =
+  [ Tile Seven Dots
+  , Tile Five Dots
+  , Tile Six Dots
+  , Tile Six Bamboo
+  , Tile Six Bamboo
+  , Tile Six Bamboo
+  , Tile Four Characters
+  , Tile Four Characters
+  , Tile Four Characters
+  , Tile Five Characters
+  , Tile Five Characters
+  , Tile Three Characters
+  , Tile Six Characters
+  , Tile Seven Characters
   ]

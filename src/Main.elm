@@ -151,11 +151,11 @@ view model =
           ]
           , tr []
             [ td []
-              (makeSpans (Tile.showPlayerHand model.cpu1Hand) 30) -- showCPUHand
+              (makeSpans (Tile.showPlayerHand (Tile.sortHand model.cpu1Hand)) 30) -- showCPUHand
             , td []
-              (makeSpans (Tile.showPlayerHand model.cpu2Hand) 30)
+              (makeSpans (Tile.showPlayerHand (Tile.sortHand model.cpu2Hand)) 30)
             , td []
-              (makeSpans (Tile.showPlayerHand model.cpu3Hand) 30)
+              (makeSpans (Tile.showPlayerHand (Tile.sortHand model.cpu3Hand)) 30)
           ]
         ]
       ]
