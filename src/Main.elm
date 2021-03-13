@@ -521,7 +521,7 @@ update msg model =
                   ( { updatedModel
                       | deck = newDeck
                       , canHu = hu
-                      , canGang = False --暗杠?
+                      , canGang = False --暗杠? calculate gangTiles earlier
                       , canPeng = False
                       , canChi = False },
                   Cmd.none )
@@ -538,7 +538,7 @@ update msg model =
                     -- | deck = newDeck
                       | discard = Just (DiscardedTile toDiscard model.turn)
                       , justMelded = False
-                      , canGang = False --暗杠?
+                      , canGang = False --暗杠? not player though, add request
                       , canPeng = False
                       , canChi = False }, Cmd.none )
               else
