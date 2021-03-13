@@ -6111,7 +6111,22 @@ var $author$project$Strategy$handleNumbered = function (tiles) {
 	var pengNumber = _v3.a;
 	var pengs = _v3.b;
 	var leftover2 = _v3.c;
-	return (_Utils_cmp(seqNumber + pengNumber, pengNumber2 + seqNumber2) > 0) ? _Utils_Tuple2(seqNumber + pengNumber, leftover2) : _Utils_Tuple2(seqNumber2 + pengNumber2, leftover4);
+	if (_Utils_eq(seqNumber + pengNumber, pengNumber2 + seqNumber2)) {
+		if ((leftover2.b && leftover2.b.b) && (!leftover2.b.b.b)) {
+			var eye1 = leftover2.a;
+			var _v5 = leftover2.b;
+			var eye2 = _v5.a;
+			return _Utils_eq(eye1, eye2) ? _Utils_Tuple2(seqNumber + pengNumber, leftover2) : _Utils_Tuple2(seqNumber2 + pengNumber2, leftover4);
+		} else {
+			return _Utils_Tuple2(seqNumber2 + pengNumber2, leftover4);
+		}
+	} else {
+		if (_Utils_cmp(seqNumber + pengNumber, pengNumber2 + seqNumber2) > 0) {
+			return _Utils_Tuple2(seqNumber + pengNumber, leftover2);
+		} else {
+			return _Utils_Tuple2(seqNumber2 + pengNumber2, leftover4);
+		}
+	}
 };
 var $author$project$Strategy$checkWin = F2(
 	function (tiles, declared) {
@@ -6453,8 +6468,8 @@ var $author$project$Strategy$findDiscard = function (tiles) {
 			return _Debug_todo(
 				'Strategy',
 				{
-					start: {line: 225, column: 13},
-					end: {line: 225, column: 23}
+					start: {line: 234, column: 13},
+					end: {line: 234, column: 23}
 				})('Exception: discard called on empty');
 		} else {
 			var ft = _v1.a;

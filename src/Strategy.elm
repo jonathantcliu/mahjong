@@ -146,7 +146,16 @@ handleNumbered tiles =
     (pengNumber2, pengs2, leftover3) = countPeng tiles
     (seqNumber2, sequences2, leftover4) = countSequences leftover3
   in
-    if seqNumber + pengNumber > pengNumber2 + seqNumber2 then
+    if seqNumber + pengNumber == pengNumber2 + seqNumber2 then
+      case leftover2 of
+        [eye1, eye2] ->
+          if eye1 == eye2 then
+            (seqNumber + pengNumber, leftover2)
+          else
+            (seqNumber2 + pengNumber2, leftover4)
+        _ ->
+          (seqNumber2 + pengNumber2, leftover4)
+    else if seqNumber + pengNumber > pengNumber2 + seqNumber2 then
       (seqNumber + pengNumber, leftover2)
     else
       (seqNumber2 + pengNumber2, leftover4)
@@ -398,4 +407,13 @@ testHand5 =
   , Tile Four Characters
   , Tile Five Characters
   , Tile Six Characters
+  ]
+
+testHand6 : List Tile -- win with 3 melds
+testHand6 =
+  [ Tile Seven Characters
+  , Tile Seven Characters
+  , Tile Seven Characters
+  , Tile Eight Characters
+  , Tile Nine Characters
   ]
