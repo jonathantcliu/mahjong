@@ -136,6 +136,25 @@ countGang tiles newtile =
   else
     ([], newtile::tiles)
 
+getDarkGang : List Tile -> (List Tile, List Tile) -- first dark gang
+getDarkGang tiles =
+  let
+    helper ts acc =
+      case ts of
+        [] ->
+          ([], acc)
+        t::trest ->
+          case countGang trest t of
+            ([], _) ->
+              let
+                (emptyGangs, emptyGangRest) = (helper trest (t::acc))
+              in
+                (emptyGangs, t::emptyGangRest)
+            (gangs, gangrest) ->
+              (gangs, gangrest)
+  in
+    helper tiles []
+
 handleNumbered : List Tile -> (Int, List Tile)
 handleNumbered tiles =
   let
@@ -460,4 +479,40 @@ testHand7 =
   , Tile Three Characters
   , Tile Six Characters
   , Tile Seven Characters
+  ]
+
+testHand8 : List Tile -- dark gang, not win
+testHand8 =
+  [ Tile Three Dots
+  , Tile Four Dots
+  , Tile Five Dots
+  , Tile Three Bamboo
+  , Tile One Characters
+  , Tile Nine Characters
+  , Tile Nine Characters
+  , Tile North Winds
+  , Tile North Winds
+  , Tile North Winds
+  , Tile North Winds
+  , Tile Green Dragons
+  , Tile Green Dragons
+  , Tile Green Dragons
+  ]
+
+testHand9 : List Tile -- dark gang, not win
+testHand9 =
+  [ Tile Eight Dots
+  , Tile Eight Dots
+  , Tile Eight Dots
+  , Tile Eight Bamboo
+  , Tile Nine Characters
+  , Tile Nine Characters
+  , Tile East Winds
+  , Tile East Winds
+  , Tile East Winds
+  , Tile East Winds
+  , Tile South Winds
+  , Tile South Winds
+  , Tile North Winds
+  , Tile North Winds
   ]

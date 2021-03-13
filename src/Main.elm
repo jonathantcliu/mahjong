@@ -121,7 +121,7 @@ view model =
     [ div [ attribute "class" "play-table-column" ]
       [ h1 [] [ text "🀄 Mahjong 麻將 마작 🀄" ]
       , div [ attribute "class" "message" ]
-        [ text (model.message) ] -- debug here
+        [ text (model.message ++ " " ++ Debug.toString model.gangTiles) ] -- debug here
       , div [ attribute "class" "new-game" ]
         (if model.canNewGame then
           [ div [] [ button [ onClick (NewGame 0) ] [ text "Start as East" ] ]
@@ -523,7 +523,7 @@ update msg model =
               if model.justMelded then -- justMelded for CPU too!
                 ({model
                 | justMelded = False
-                , message = "Find something to discard!"}, Cmd.none)
+                , message = "Good job! Now find something to discard"}, Cmd.none)
               else
                 let
                   (newHand, newDeck)
@@ -531,19 +531,22 @@ update msg model =
                   hu = Strategy.checkWin newHand model.playerMelds
                   updatedModel =
                     updateHand model (Tile.sortHand newHand) model.turn
+                  (gangs, gangrest) = Strategy.getDarkGang newHand -- now newHand instead of model.playerHand
+                  gangT =
+                    if gangs == [] then Nothing else Just (gangs, gangrest)
                 in
                   ( { updatedModel
-                      | deck = newDeck
-                      , canHu = hu && not updatedModel.canNewGame -- self-touch win
-                      , canGang = False -- 暗杠? calculate gangTiles earlier and do
-                      , canPeng = False
-                      , canChi = False
-                      , message =
-                        if hu then
-                          "You can win if you want to!"
-                        else
-                          "Find something to discard!" },
-                  Cmd.none )
+                    | deck = newDeck
+                    , canHu = hu && not updatedModel.canNewGame -- self-touch win
+                    , canGang = gangs /= [] -- 暗杠? calculate gangTiles earlier and do
+                    , canPeng = False
+                    , canChi = False
+                    , gangTiles = gangT
+                    , message =
+                      if hu then
+                        "You can win if you want to!"
+                      else
+                        "Find something to discard!" }, Cmd.none )
             else
               if model.justMelded then
                 let
@@ -557,7 +560,7 @@ update msg model =
                     -- | deck = newDeck
                       | discard = Just (DiscardedTile toDiscard model.turn)
                       , justMelded = False
-                      , canGang = False --暗杠? not player though, add request
+                      , canGang = False --暗杠? not player though, add request if can
                       , canPeng = False
                       , canChi = False }, Cmd.none )
                       -- , message = "CPU " ++ (Debug.toString model.turn) ++ "'s turn"}, Cmd.none )
@@ -637,84 +640,87 @@ update msg model =
                   t
                   discarder
     CheckRequests ->
-      case model.request of
-        Nothing ->
-          if model.canNewGame ||
-          (model.turn == 0 && model.discard == Nothing) then
-            (model, Cmd.none)
-          else
-            update
-            RunGame
-            { model
-            | turn = modBy 4 (model.turn + 1)
-            , discard = Nothing
-            , gangTiles = Nothing
-            , pengTiles = Nothing
-            , chiTiles = Nothing }
-        Just r ->
-          let
-            shownModel meld = addShown model meld r.requester
-            updatedModel m =
-              { m
-              | turn = r.requester
-              , canGang = False
-              , canPeng = False
-              , canChi = False
-              , request = Nothing
+      if model.canNewGame then
+        (model, Cmd.none)
+      else
+        case model.request of
+          Nothing ->
+            if model.canNewGame ||
+            (model.turn == 0 && model.discard == Nothing) then
+              (model, Cmd.none)
+            else
+              update
+              RunGame
+              { model
+              | turn = modBy 4 (model.turn + 1)
               , discard = Nothing
               , gangTiles = Nothing
               , pengTiles = Nothing
               , chiTiles = Nothing }
-          in
-            case r.attempt of
-              Hu tiles ->
-                ({model | message = "winner: " ++ Debug.toString r.requester},
-                Cmd.none)
-              Gang (gang, rest) ->
-                let
-                  newModel =
-                    updatedModel
-                      (updateHand (shownModel gang) rest r.requester)
-                in
-                  update
-                  RunGame
-                  { newModel
-                  | justMelded = False
-                  , message =
-                    if r.requester /= 0 then
-                      "Gang from CPU " ++ (Debug.toString r.requester)
-                    else
-                      newModel.message }
-              Peng (peng, rest) ->
-                let
-                  newModel =
-                    updatedModel
-                      (updateHand (shownModel peng) rest r.requester)
-                in
-                  update
-                  RunGame
-                  { newModel
-                  | justMelded = True
-                  , message =
-                    if r.requester /= 0 then
-                      "Peng from CPU " ++ (Debug.toString r.requester)
-                    else
-                      newModel.message } -- was r.requester == 0
-              Chi (chi, rest) ->
-                let
-                  newModel =
-                    updatedModel
-                      (updateHand (shownModel chi) rest r.requester)
-                in
-                  update
-                  RunGame
-                  { newModel
-                  | justMelded = True
-                  , message =
-                    if r.requester /= 0 then
-                      "Chi from CPU " ++ (Debug.toString r.requester)
-                    else
-                      newModel.message } -- was r.requester == 0
+          Just r ->
+            let
+              shownModel meld = addShown model meld r.requester
+              updatedModel m =
+                { m
+                | turn = r.requester
+                , canGang = False
+                , canPeng = False
+                , canChi = False
+                , request = Nothing
+                , discard = Nothing
+                , gangTiles = Nothing
+                , pengTiles = Nothing
+                , chiTiles = Nothing }
+            in
+              case r.attempt of
+                Hu tiles ->
+                  ({model | message = "winner: " ++ Debug.toString r.requester},
+                  Cmd.none)
+                Gang (gang, rest) ->
+                  let
+                    newModel =
+                      updatedModel
+                        (updateHand (shownModel gang) rest r.requester)
+                  in
+                    update
+                    RunGame
+                    { newModel
+                    | justMelded = False
+                    , message =
+                      if r.requester /= 0 then
+                        "Gang from CPU " ++ (Debug.toString r.requester)
+                      else
+                        newModel.message }
+                Peng (peng, rest) ->
+                  let
+                    newModel =
+                      updatedModel
+                        (updateHand (shownModel peng) rest r.requester)
+                  in
+                    update
+                    RunGame
+                    { newModel
+                    | justMelded = True
+                    , message =
+                      if r.requester /= 0 then
+                        "Peng from CPU " ++ (Debug.toString r.requester)
+                      else
+                        newModel.message } -- was r.requester == 0
+                Chi (chi, rest) ->
+                  let
+                    newModel =
+                      updatedModel
+                        (updateHand (shownModel chi) rest r.requester)
+                  in
+                    update
+                    RunGame
+                    { newModel
+                    | justMelded = True
+                    , message =
+                      if r.requester /= 0 then
+                        "Chi from CPU " ++ (Debug.toString r.requester)
+                      else
+                        newModel.message } -- was r.requester == 0
     PlayerSelect n ->
       ( playerSelect model n
       , Cmd.none )
@@ -816,7 +822,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Time.every 2000 (Basics.always CheckRequests)
+  Time.every 1000 (Basics.always CheckRequests)
 
 main : Program () Model Msg
 main =
