@@ -121,7 +121,7 @@ view model =
     [ div [ attribute "class" "play-table-column" ]
       [ h1 [] [ text "🀄 Mahjong 麻將 마작 🀄" ]
       , div [ attribute "class" "message" ]
-        [ text (model.message ++ " " ++ Debug.toString model.gangTiles) ] -- debug here
+        [ text (model.message) ] -- debug here
       , div [ attribute "class" "new-game" ]
         (if model.canNewGame then
           [ div [] [ button [ onClick (NewGame 0) ] [ text "Start as East" ] ]
@@ -745,7 +745,7 @@ update msg model =
         | message =
             case model.discard of
               Nothing ->
-                "You self-touch win, you god!"
+                "You self-touch win, you god! 👍"
               Just dt ->
                 "You win off of CPU " ++
                   Debug.toString dt.discarder ++
