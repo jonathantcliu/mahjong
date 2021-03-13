@@ -395,7 +395,20 @@ getMove m cpu t discarder =
                         cpuHand
                       Just dt ->
                         dt.tile::cpuHand
-                in
+                in -- may not need CheckRequests here
+                  -- update
+                  -- CheckRequests
+                  ((updateHand
+                  { m
+                  | message = "game over, CPU " ++
+                      Debug.toString cpu ++
+                      " wins!"
+                  , discard = Nothing
+                  , request = Nothing
+                  , canNewGame = True }
+                  newHand
+                  cpu), Cmd.none)
+                  {-
                   ( updateHand
                     { m
                     | message = "game over, CPU " ++
@@ -404,7 +417,7 @@ getMove m cpu t discarder =
                     , discard = Nothing
                     , canNewGame = True }
                     newHand
-                    cpu, Cmd.none )
+                    cpu, Cmd.none ) -}
               Gang (gang, rest) -> -- overrules anything except for Hu
                 -- let
                 -- newModel = updateHand m rest cpu
