@@ -151,11 +151,20 @@ view model =
           ]
           , tr []
             [ td []
-              (makeSpans (Tile.showPlayerHand (Tile.sortHand model.cpu1Hand)) 30) -- showCPUHand
+              (if model.canNewGame then
+                (makeSpans (Tile.showPlayerHand (Tile.sortHand model.cpu1Hand)) 30)
+              else
+                (makeSpans (Tile.showCPUHand model.cpu1Hand) 30))
             , td []
-              (makeSpans (Tile.showPlayerHand (Tile.sortHand model.cpu2Hand)) 30)
+              (if model.canNewGame then
+                (makeSpans (Tile.showPlayerHand (Tile.sortHand model.cpu2Hand)) 30)
+              else
+                (makeSpans (Tile.showCPUHand model.cpu2Hand) 30))
             , td []
-              (makeSpans (Tile.showPlayerHand (Tile.sortHand model.cpu3Hand)) 30)
+              (if model.canNewGame then
+                (makeSpans (Tile.showPlayerHand (Tile.sortHand model.cpu3Hand)) 30)
+              else
+                (makeSpans (Tile.showCPUHand model.cpu3Hand) 30))
           ]
         ]
       ]
@@ -463,7 +472,8 @@ getMove m cpu t discarder =
                       discarder
                     else
                       getMove
-                      { m | message = "CPU " ++ (Debug.toString cpu) ++ "'s chi attempt failed" }
+                      -- { m | message = "CPU " ++ (Debug.toString cpu) ++ "'s chi attempt failed" }
+                      m
                       (cpu + 1)
                       t
                       discarder
@@ -496,7 +506,7 @@ update msg model =
     RunGame ->
       if model.deck == [] then
         ( { model
-          | message = "draw!"
+          | message = "Draw!"
           , canNewGame = True
           , turn = 0
           , canHu = False
