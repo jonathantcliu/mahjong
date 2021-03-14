@@ -42,7 +42,8 @@ type alias Model =
   , justMelded : Bool
   , gangTiles : Maybe (List Tile, List Tile)
   , pengTiles : Maybe (List Tile, List Tile)
-  , chiTiles : Maybe (List Tile, List Tile) }
+  , chiTiles : Maybe (List Tile, List Tile)
+  , showHelp : Bool }
   -- (List Tile, List Tile) is (meld, leftover tiles)
 
 type Direction
@@ -89,7 +90,8 @@ init _ =
       , justMelded = False
       , gangTiles = Nothing
       , pengTiles = Nothing
-      , chiTiles = Nothing }
+      , chiTiles = Nothing
+      , showHelp = False }
     , Cmd.none )
 
 type Msg
@@ -103,6 +105,7 @@ type Msg
   | PlayerChi -- discard should be non-Nothing
   | RunGame
   | CheckRequests -- every x seconds
+  | ToggleHelp
 
 shuffleDeck : Cmd Msg
 shuffleDeck =
@@ -262,11 +265,16 @@ view model =
           ]
         ]
       ]
+    , br [] []
+    , button
+      [ onClick ToggleHelp ]
+      [ text "Help!" ]
     , pre [ attribute
           "style"
           ("font-family: \"Times New Roman\", Times, serif;" ++
           "font-size: 25px;") ]
         [ text
+          (if model.showHelp then
           ("Mahjong is a turn-based game where 4 players compete to " ++
           "create the best winning hand!\nEach turn, a player draws a tile " ++
           "and chooses one to discard.\nIf another player can create a " ++
@@ -280,12 +288,13 @@ view model =
           "a group of four matching tiles, called a \"Gang\" (\"Kong\")\n\n" ++
           "Notes:\n" ++
           "  a Gang can only be part of a winning hand if it is " ++
-          "declared and shown!\n" ++
+          "declared!\n" ++
           "  a Chi can only be melded if the discarder is the person who " ++
           "who plays before you or if it would win you the game!\n\n" ++
           "To win, collect:\n" ++
           "Four melds (including your declared melds above your hand)\n" ++
-          "Two eyes, which are a pair of any matching tiles") ]
+          "Two eyes, which are a pair of any matching tiles")
+          else "") ]
     ]
 
 makeSpans : List String -> Int -> List (Html msg)
@@ -866,6 +875,8 @@ update msg model =
               update
               CheckRequests
               model
+    ToggleHelp ->
+      ({model | showHelp = not model.showHelp}, Cmd.none)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
