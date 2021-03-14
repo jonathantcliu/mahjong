@@ -865,7 +865,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Time.every 2000 (Basics.always CheckRequests)
+  Time.every 5000 (Basics.always CheckRequests)
 
 main : Program () Model Msg
 main =
