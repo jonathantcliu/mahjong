@@ -262,6 +262,26 @@ view model =
           ]
         ]
       ]
+    , pre [ attribute
+          "style"
+          ("font-family: \"Times New Roman\", Times, serif;") ]
+        [ text
+          ("Mahjong is a turn-based game where 4 players compete to " ++
+          "create the best winning hand!\nEach turn, a player draws a tile " ++
+          "and chooses one to discard.\nIf another player can create a " ++
+          "meld with the discarded tile, the other player can interrupt " ++
+          "play and declare the new meld, showing it to all players.\n\n" ++
+          "A meld is either:\n" ++
+          "a group of three matching tiles, called a \"Peng\"\n" ++
+          "a group of three tiles of the same suit in numerical " ++
+          "succession, called a \"Chow\"\n" ++
+          "    for example: (🀇, 🀈, 🀉) or (🀑, 🀒, 🀓) or (🀛, 🀜, 🀝)\n" ++
+          "a group of four matching tiles, called a \"Gang\"\n\n" ++
+          "Note: a Gang can only be part of a winning hand if it is " ++
+          "declared and shown!\n\n" ++
+          "To win, collect:\n" ++
+          "Four melds (including your declared melds above your hand)\n" ++
+          "Two eyes, which are a pair of any matching tiles") ]
     ]
 
 makeSpans : List String -> Int -> List (Html msg)
@@ -697,8 +717,8 @@ update msg model =
               case r.attempt of
                 Hu tiles ->
                   ( { model
-                    | message = "winner: " ++ Debug.toString r.requester },
-                  Cmd.none )
+                    | message = "Winner: " ++ Debug.toString r.requester },
+                  Cmd.none ) -- no one uses this
                 Gang (gang, rest) ->
                   let
                     newModel =
@@ -768,7 +788,7 @@ update msg model =
         | message =
             case model.discard of
               Nothing ->
-                "You self-touch win, you god! 👍"
+                "You drew your own winning tile! Good job 👍"
               Just dt ->
                 "You win off of CPU " ++
                   Debug.toString dt.discarder ++
