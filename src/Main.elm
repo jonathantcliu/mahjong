@@ -272,12 +272,13 @@ view model =
     , pre [ attribute
           "style"
           ("font-family: \"Times New Roman\", Times, serif;" ++
-          "font-size: 25px;") ]
+          "font-size: 24px;") ]
         [ text
           (if model.showHelp then
           ("Mahjong is a turn-based game where 4 players compete to " ++
           "create the best winning hand!\nEach turn, a player draws a tile " ++
-          "and chooses one to discard.\nIf another player can create a " ++
+          "and chooses one to discard. Usually, you keep tiles that will " ++
+          "help you make melds.\nIf another player can create a " ++
           "meld with the discarded tile, the other player can interrupt " ++
           "play and declare the new meld, showing it to all players.\n\n" ++
           "A meld is either:\n" ++
@@ -795,7 +796,8 @@ update msg model =
             , discard = Just (DiscardedTile t 0)
             , playerHand = newHand
             , turn = modBy 4 (model.turn)
-            , justMelded = False }
+            , justMelded = False
+            , message = "Great discard!" }
     PlayerHu ->
       ( { model
         | message =
