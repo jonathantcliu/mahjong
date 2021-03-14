@@ -275,26 +275,28 @@ view model =
           "font-size: 24px;") ]
         [ text
           (if model.showHelp then
-          ("Mahjong is a turn-based game where 4 players compete to " ++
-          "create the best winning hand!\nEach turn, a player draws a tile " ++
+          (" Mahjong is a turn-based game where 4 players compete to " ++
+          "create the best winning hand!\n Each turn, a player draws a tile " ++
           "and chooses one to discard. Usually, you keep tiles that will " ++
-          "help you make melds.\nIf another player can create a " ++
+          "help you make melds.\n If another player can create a " ++
           "meld with the discarded tile, the other player can interrupt " ++
           "play and declare the new meld, showing it to all players.\n\n" ++
-          "A meld is either:\n" ++
-          "a group of three matching tiles, called a \"Peng\" (\"Pung\")\n" ++
-          "a group of three tiles of the same suit in numerical " ++
-          "succession, called a \"Chi\" (\"Chow\")\n" ++
+          " A meld is either:\n" ++
+          " a group of three matching tiles, called a \"Peng\" (\"Pung\")\n" ++
+          " a group of three tiles of the same suit in numerical " ++
+          " succession, called a \"Chi\" (\"Chow\")\n" ++
           "    for example: (🀇, 🀈, 🀉) or (🀑, 🀒, 🀓) or (🀛, 🀜, 🀝)\n" ++
-          "a group of four matching tiles, called a \"Gang\" (\"Kong\")\n\n" ++
-          "Notes:\n" ++
-          "  a Gang can only be part of a winning hand if it is " ++
+          " a group of four matching tiles, called a \"Gang\" (\"Kong\")\n\n" ++
+          " Notes:\n" ++
+          "   a Gang can only be part of a winning hand if it is " ++
           "declared!\n" ++
-          "  a Chi can only be melded if the discarder is the person who " ++
-          "who plays before you or if it would win you the game!\n\n" ++
-          "To win, collect:\n" ++
-          "Four melds (including your declared melds above your hand)\n" ++
-          "Two eyes, which are a pair of any matching tiles")
+          "   a Chi can only be melded if the discarder is the person who " ++
+          "who plays before you or if it would win you the game!\n" ++
+          "   the order of precedence in using a discarded tile is win > " ++
+          "gang > peng > chi\n\n" ++
+          " To win, collect:\n" ++
+          "  Four melds (including your declared melds above your hand)\n" ++
+          "  Two eyes, which are a pair of any matching tiles")
           else "") ]
     ]
 
